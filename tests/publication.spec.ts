@@ -150,3 +150,62 @@ test("all visible internal links resolve and crawler files list every entry", as
     404,
   );
 });
+
+test("narrow phones keep navigation and research reading usable", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 320, height: 720 });
+  await page.goto("/");
+  const gap = await page.evaluate(() => {
+    const brand = document.querySelector(".wordmark")!.getBoundingClientRect();
+    const menu = document
+      .querySelector(".menu-toggle")!
+      .getBoundingClientRect();
+    return menu.left - brand.right;
+  });
+  expect(gap).toBeGreaterThanOrEqual(12);
+  await page.getByRole("button", { name: "Open navigation" }).click();
+  await expect(
+    page.getByRole("navigation", { name: "Mobile navigation" }),
+  ).toBeVisible();
+  await page
+    .getByRole("navigation", { name: "Mobile navigation" })
+    .getByRole("link", { name: "Research" })
+    .click();
+  await expect(page).toHaveURL(/\/research\/$/);
+  await expect(page.getByText("Swipe for more sectors")).toBeVisible();
+  await page.getByRole("button", { name: "Other", exact: true }).click();
+  await expect(
+    page.getByRole("heading", { name: "No other notes yet." }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: /All/ }).first().click();
+  await page
+    .getByRole("link", { name: "Read research on Asian Paints" })
+    .click();
+  const summary = page.locator(".mobile-contents summary");
+  expect(
+    await summary.evaluate((element) => element.getBoundingClientRect().height),
+  ).toBeGreaterThanOrEqual(44);
+  await summary.click();
+  await page
+    .locator('.mobile-contents a[href="#financial-performance"]')
+    .click();
+  await expect(
+    page.getByText("Swipe to see all columns").first(),
+  ).toBeVisible();
+  const dataNote = page.locator(".data-table-note").first();
+  await expect(dataNote).toContainText("Illustrative sample data only");
+  expect(
+    await dataNote.evaluate((element) => element.getBoundingClientRect().width),
+  ).toBeGreaterThan(250);
+  const table = page.locator(".table-scroll").first();
+  await table.evaluate((element) => {
+    element.scrollLeft = 180;
+  });
+  expect(await table.evaluate((element) => element.scrollLeft)).toBeGreaterThan(
+    0,
+  );
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(
+    320,
+  );
+});

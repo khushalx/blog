@@ -585,6 +585,12 @@ em {
   border-color: var(--green);
   color: var(--green);
 }
+.filter-bar button:focus-visible {
+  outline-offset: -4px;
+}
+.filter-hint {
+  display: none;
+}
 .filter-bar button span {
   font-size: 12px;
   margin-left: 7px;
@@ -916,6 +922,28 @@ em {
   overflow-x: auto;
   margin: 28px 0;
   overscroll-behavior-x: contain;
+}
+.table-swipe-hint {
+  display: none;
+}
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+.table-frame.has-caption .table-scroll {
+  margin-bottom: 0;
+}
+.data-table-note {
+  color: var(--muted);
+  font: 12px/1.6 var(--sans);
+  margin: 8px 0 28px;
 }
 .prose table {
   width: 100%;
@@ -1372,7 +1400,43 @@ em {
     gap: 25px;
   }
   .filter-bar button {
+    font-size: 14px;
+    min-height: 48px;
+  }
+  .filter-hint {
+    display: block;
+    color: var(--muted);
     font-size: 12px;
+    margin-top: 8px;
+  }
+  .research-entry {
+    grid-template-columns: minmax(0, 1fr) 44px;
+  }
+  .arrow-link {
+    min-width: 44px;
+    min-height: 44px;
+  }
+  .mobile-contents summary {
+    min-height: 44px;
+    padding-block: 10px;
+  }
+  .mobile-contents li a {
+    min-height: 44px;
+    align-items: center;
+  }
+  .table-swipe-hint {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    color: var(--muted);
+    font: 12px/1.4 var(--sans);
+    margin-top: 20px;
+  }
+  .table-swipe-hint span {
+    color: var(--green);
+  }
+  .table-frame .table-scroll {
+    margin-top: 9px;
   }
   .index-number {
     display: none;
@@ -1637,11 +1701,30 @@ em {
   .footer-top nav {
     gap: 22px;
   }
+  .footer-top nav a {
+    min-height: 44px;
+  }
   .eyebrow {
     letter-spacing: 0.1em;
   }
   .index-articles .article-entry:first-child {
     padding-top: 20px;
+  }
+}
+@media (max-width: 360px) {
+  .header-inner {
+    height: 72px;
+  }
+  .wordmark small {
+    display: none;
+  }
+  .home-intro h1 {
+    font-size: clamp(54px, 16vw, 58px);
+    letter-spacing: -2px;
+  }
+  .sample-tag {
+    border-left: 0;
+    padding-left: 0;
   }
 }
 @media (prefers-reduced-motion: reduce) {

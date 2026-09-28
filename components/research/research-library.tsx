@@ -10,17 +10,22 @@ export function ResearchLibrary({ entries }: { entries: ResearchMeta[] }) {
   );
   return (
     <>
-      <div className="filter-bar" aria-label="Filter research by sector">
-        {["All", ...sectors].map((item) => (
-          <button
-            key={item}
-            onClick={() => setSector(item)}
-            aria-pressed={sector === item}
-          >
-            {item}
-            {item === "All" && <span>{entries.length}</span>}
-          </button>
-        ))}
+      <div className="filter-shell">
+        <div className="filter-bar" aria-label="Filter research by sector">
+          {["All", ...sectors].map((item) => (
+            <button
+              key={item}
+              onClick={() => setSector(item)}
+              aria-pressed={sector === item}
+            >
+              {item}
+              {item === "All" && <span>{entries.length}</span>}
+            </button>
+          ))}
+        </div>
+        <p className="filter-hint" aria-hidden="true">
+          Swipe for more sectors →
+        </p>
       </div>
       <div className="library-count" aria-live="polite">
         {shown.length} {shown.length === 1 ? "research note" : "research notes"}

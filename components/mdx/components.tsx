@@ -56,6 +56,32 @@ export function Risk({
 export function SourceNote({ children }: { children: ReactNode }) {
   return <div className="source-note">{children}</div>;
 }
+function TableFrame({
+  label,
+  caption,
+  children,
+}: {
+  label: string;
+  caption?: string;
+  children: ReactNode;
+}) {
+  return (
+    <div className={caption ? "table-frame has-caption" : "table-frame"}>
+      <p className="table-swipe-hint" aria-hidden="true">
+        Swipe to see all columns <span>→</span>
+      </p>
+      <div
+        className="table-scroll"
+        role="region"
+        aria-label={`${label}; scroll horizontally for more columns`}
+        tabIndex={0}
+      >
+        {children}
+      </div>
+      {caption && <p className="data-table-note">{caption}</p>}
+    </div>
+  );
+}
 export function DataTable({
   caption,
   columns,
@@ -66,14 +92,9 @@ export function DataTable({
   rows: (string | number)[][];
 }) {
   return (
-    <div
-      className="table-scroll"
-      role="region"
-      aria-label={caption}
-      tabIndex={0}
-    >
+    <TableFrame label={caption} caption={caption}>
       <table>
-        <caption>{caption}</caption>
+        <caption className="visually-hidden">{caption}</caption>
         <thead>
           <tr>
             {columns.map((column) => (
@@ -99,7 +120,7 @@ export function DataTable({
           ))}
         </tbody>
       </table>
-    </div>
+    </TableFrame>
   );
 }
 export function Sources({ children }: { children: ReactNode }) {
@@ -142,14 +163,9 @@ export const mdxComponents: MDXComponents = {
   Sources,
   Figure,
   table: (props: ComponentProps<"table">) => (
-    <div
-      className="table-scroll"
-      tabIndex={0}
-      role="region"
-      aria-label="Article data table"
-    >
+    <TableFrame label="Article data table">
       <table {...props} />
-    </div>
+    </TableFrame>
   ),
   a: ({ href, children, ...props }: ComponentProps<"a">) => (
     <a

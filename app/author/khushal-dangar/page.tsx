@@ -16,7 +16,7 @@ export default async function AuthorPage() {
     <p className="trust-lead">Computer Science &amp; AI student exploring businesses, financial markets, valuation and technology through independent research and clear writing.</p>
     <p>My research notes are working documents. I use primary sources where possible, show assumptions, and distinguish observed facts from interpretation. This publication is a record of learning, not a professional investment advisory service.</p>
     <p><Link href="/about/">Read more about the publication</Link> · <Link href="/editorial-policy/">Editorial and research policy</Link></p>
-    <h2>Research</h2><ul>{research.filter((entry) => entry.author === site.author).map((entry) => <li key={entry.slug}><Link href={`/research/${entry.slug}/`}>{entry.company}: {entry.title}</Link></li>)}</ul>
+    {research.length > 0 && <><h2>Research</h2><ul>{research.filter((entry) => entry.author === site.author).map((entry) => <li key={entry.slug}><Link href={`/research/${entry.slug}/`}>{entry.company}: {entry.title}</Link></li>)}</ul></>}
     <h2>Articles</h2><ul>{articles.filter((entry) => entry.author === site.author).map((entry) => <li key={entry.slug}><Link href={`/articles/${entry.slug}/`}>{entry.title}</Link></li>)}</ul>
   </div>;
 }

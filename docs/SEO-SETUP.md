@@ -9,7 +9,7 @@ The site is a Next.js static export. `npm run build` writes files to `out/`. Set
 - `WebSite`, `Person`, `Article` and `BreadcrumbList` JSON-LD where applicable. Demo articles deliberately have no Article JSON-LD.
 - Open Graph and X/Twitter cards use a static 1200 × 630 PNG fallback at `/social-card.png`. Each published entry receives a generated branded PNG in `public/social/` during `npm run build`; a real featured image can override it. The generated directory is intentionally ignored by Git and rebuilt from MDX.
 - Author, editorial policy, disclaimer and privacy pages. Article and research bylines link to the author profile.
-- A demo entry is readable but marked `noindex` and omitted from sitemap and RSS. A draft or future-dated entry is excluded from public lists and generated routes. All seven current pieces are demos. The homepage and content indexes are also `noindex` until a real, indexable piece exists. Replace samples with verified work before requesting indexing.
+- A demo entry is readable but marked `noindex` and omitted from sitemap and RSS. A draft or future-dated entry is excluded from public lists and generated routes. The publication currently has one sourced article and no research reports. The research index remains available with an honest empty state until the first report is published.
 
 ## Add an article or research note
 
@@ -20,7 +20,7 @@ Create `content/articles/<slug>.mdx` or `content/research/<slug>.mdx`. The filen
 title: "A specific, useful title"
 slug: "a-specific-useful-title"
 description: "What the reader will learn from this piece."
-category: "Valuation" # Research uses company, ticker, sector, status; see existing notes.
+category: "Business" # Research instead uses company, ticker, sector, status, market and focus.
 publishedAt: "2026-10-08"
 updatedAt: "2026-10-15" # Only for meaningful revisions.
 featured: false
@@ -41,9 +41,9 @@ sources:
 ---
 ```
 
-`readingTime` is optional and calculated from body length if omitted. `author` defaults to Khushal Dangar; only use a different name after creating that person's real profile and updating the byline/schema routing. `canonical` is optional for a duplicate or syndicated page; use a fully qualified URL or a site-root path. A non-self canonical excludes the page from the sitemap. Use `draft: true` while writing. Keep `demo: true` for examples. A production piece needs verified sourcing and `demo: false`.
+`readingTime` is optional and calculated from body length if omitted. `author` defaults to Khushal Dangar; only use a different name after creating that person's real profile and updating the byline/schema routing. `canonical` is optional for a duplicate or syndicated page; use a fully qualified URL or a site-root path. A non-self canonical excludes the page from the sitemap. Use `draft: true` while writing. Use `demo: true` only for unpublished examples. A production piece needs verified sourcing and `demo: false`. The existing revenue-and-cash article shows a sourced table and a compact interactive MDX component.
 
-Run `npm run typecheck`, `npm run build`, and `npm run test:e2e`. Check the generated page's title, one H1, source links, table behavior, mobile layout, canonical and social image. The site does not create category landing pages yet because each current category would be thin. Add one only when there is enough original content to justify it.
+Run `npm run typecheck`, `npm run build`, and `npm run test:e2e`. Check the generated page's title, one H1, source links, table behavior, mobile layout, canonical and social image. The site does not create category landing pages yet because the current library is small. Add one only when there is enough original content to justify it.
 
 ## Search Console
 
@@ -60,4 +60,4 @@ The site has no analytics account or ID by default. To enable GA4, create a web 
 
 ## Validation and limits
 
-Use [Google's Rich Results Test](https://search.google.com/test/rich-results) and [Schema Markup Validator](https://validator.schema.org/) on public URLs. Test a share URL in the platforms you use after deployment. The repository cannot verify DNS, HTTPS redirects, authentication, real-world crawl access, account ownership or live Core Web Vitals. The public domain and real content remain launch requirements.
+Use [Google's Rich Results Test](https://search.google.com/test/rich-results) and [Schema Markup Validator](https://validator.schema.org/) on public URLs. Test a share URL in the platforms you use after deployment. The repository cannot verify DNS, HTTPS redirects, authentication, real-world crawl access, account ownership or live Core Web Vitals. A public domain remains a launch requirement.

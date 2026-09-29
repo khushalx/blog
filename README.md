@@ -13,4 +13,4 @@ Open `http://localhost:3000`. Use `npm run build` to produce a static export in 
 
 For a public build, set `NEXT_PUBLIC_SITE_URL` to the exact HTTPS origin and run `npm run build:public`. The public host must serve `out/`, return a real 404 for missing pages, and redirect alternate hostnames and HTTP to the canonical origin. See [SEO setup](docs/SEO-SETUP.md) and the [public launch checklist](docs/PUBLIC-LAUNCH-CHECKLIST.md).
 
-Write new research in `content/research/` and articles in `content/articles/`. Use the existing MDX files as format examples and follow the [metadata and sourcing guide](docs/SEO-SETUP.md#add-an-article-or-research-note). Current entries are labelled demonstration content and are excluded from indexing until replaced with verified original work.
+Write new research in `content/research/` and articles in `content/articles/`. Follow the [metadata and sourcing guide](docs/SEO-SETUP.md#add-an-article-or-research-note). The article in `content/articles/` is a sourced format example; the research library is intentionally empty until the first original report is ready.

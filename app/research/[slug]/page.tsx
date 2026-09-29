@@ -13,7 +13,10 @@ import { JsonLd, articleSchema, breadcrumbSchema } from "@/lib/seo/schema";
 import { site } from "@/lib/site";
 export const dynamicParams = false;
 export async function generateStaticParams() {
-  return (await getAllResearch()).map(({ slug }) => ({ slug }));
+  const slugs = (await getAllResearch()).map(({ slug }) => ({ slug }));
+  // Static export requires at least one generated path for a dynamic route.
+  // This reserved path renders notFound() and disappears once a note is published.
+  return slugs.length ? slugs : [{ slug: "__no_research__" }];
 }
 export async function generateMetadata({
   params,

@@ -32,7 +32,7 @@ export default async function ArticlesPage() {
         </span>
         <span className="eyebrow muted">NEWEST FIRST</span>
       </div>
-      <div className="article-grid index-articles">
+      <div className={`article-grid index-articles${articles.length === 1 ? " single-article" : ""}`}>
         {articles.map((entry) => (
           <ArticleEntry key={entry.slug} entry={entry} />
         ))}

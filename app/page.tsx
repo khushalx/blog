@@ -50,13 +50,12 @@ export default async function Home() {
           </span>
         </div>
       </section>
-      <section className="home-research">
+      {latest && <section className="home-research">
         <SectionHeading
           title="Latest research"
           href="/research"
           link="View all research"
         />
-        {latest && (
           <article className="featured-research">
             <div className="feature-content">
               <div className="feature-label">
@@ -106,20 +105,19 @@ export default async function Home() {
               <span className="lens-foot">A BUSINESS-FIRST PERSPECTIVE</span>
             </aside>
           </article>
-        )}
         <div className="recent-research">
           {research.slice(1, 4).map((entry) => (
             <ResearchEntry key={entry.slug} entry={entry} />
           ))}
         </div>
-      </section>
+      </section>}
       <section className="home-articles">
         <SectionHeading
           title="Latest articles"
           href="/articles"
           link="View all articles"
         />
-        <div className="article-grid">
+        <div className={`article-grid${articles.length === 1 ? " single-article" : ""}`}>
           {articles.slice(0, 4).map((entry) => (
             <ArticleEntry key={entry.slug} entry={entry} />
           ))}

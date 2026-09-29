@@ -6,6 +6,7 @@
     "dev": "next dev",
     "prebuild": "node scripts/generate-social-images.mjs",
     "build": "next build",
+    "postbuild": "node scripts/clean-empty-research-route.mjs",
     "build:public": "node scripts/check-public-launch.mjs && npm run build",
     "start": "node scripts/serve.mjs",
     "typecheck": "tsc --noEmit",

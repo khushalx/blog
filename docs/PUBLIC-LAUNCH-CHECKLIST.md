@@ -1,7 +1,7 @@
 # Public launch checklist
 
 ## Content
-- [ ] Replace demo notes with sourced original work; set `demo: false` only after review.
+- [ ] Review the sourced revenue-and-cash article and publish future research only after its evidence and calculations are ready.
 - [ ] Confirm every financial number, date, company description and citation.
 - [ ] Add meaningful updated dates and disclose any relevant conflicts in each piece.
 - [ ] Review About, author, editorial policy, disclaimer and privacy text for accuracy.

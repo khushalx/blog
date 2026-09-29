@@ -1,5 +1,6 @@
 import type { ComponentProps, ReactNode } from "react";
 import type { MDXComponents } from "mdx/types";
+import Image from "next/image";
 export function ResearchCallout({
   title = "The key idea",
   children,
@@ -141,7 +142,7 @@ export function Figure({
 }) {
   return (
     <figure>
-      <img
+      <Image
         src={src}
         alt={alt}
         width={width}
@@ -179,6 +180,8 @@ export const mdxComponents: MDXComponents = {
     </a>
   ),
   img: ({ alt, ...props }: ComponentProps<"img">) => (
+    // MDX permits arbitrary source images; static export has no image optimizer.
+    // eslint-disable-next-line @next/next/no-img-element
     <img {...props} alt={alt || ""} loading="lazy" decoding="async" />
   ),
 };

@@ -73,6 +73,7 @@ h3 {
 svg {
   flex-shrink: 0;
 }
+img { max-width: 100%; height: auto; }
 em {
   font-family: var(--serif);
   font-weight: 400;
@@ -82,6 +83,24 @@ em {
   width: min(1160px, calc(100% - 112px));
   margin-inline: auto;
 }
+.trust-page { max-width: 850px; padding-top: 66px; padding-bottom: 90px; }
+.trust-page h1 { font: 400 clamp(42px, 6vw, 72px)/1.05 var(--serif); letter-spacing: -0.025em; margin: 18px 0 28px; }
+.trust-page h2 { font: 400 30px/1.2 var(--serif); margin: 40px 0 12px; }
+.trust-page p, .trust-page li { font-size: 16px; line-height: 1.8; margin-bottom: 16px; }
+.trust-page .trust-lead { font: 400 clamp(22px, 3vw, 28px)/1.45 var(--serif); }
+.trust-page ul { padding-left: 22px; }
+.trust-page a, .about-policy-links a { color: var(--green); text-decoration: underline; text-underline-offset: 4px; }
+.about-policy-links { display: flex; flex-wrap: wrap; gap: 12px 22px; margin-top: 28px; }
+.related-content, .source-references { border-top: 1px solid var(--line); margin-top: 46px; padding-top: 25px; }
+.related-content h2, .source-references h2 { font: 400 28px/1.2 var(--serif); margin-bottom: 18px; }
+.related-content ul, .source-references ol { padding-left: 21px; }
+.related-content li, .source-references li { margin: 10px 0; line-height: 1.55; }
+.related-content a, .source-references a { color: var(--green); text-decoration: underline; text-underline-offset: 3px; }
+.featured-image { margin: 32px 0; }
+.featured-image img { display: block; width: 100%; height: auto; }
+.featured-image figcaption { color: var(--muted); font-size: 13px; margin-top: 8px; }
+.article-tags { display: flex; flex-wrap: wrap; gap: 8px; list-style: none; padding: 0; margin: 18px 0 0; }
+.article-tags li { border: 1px solid var(--line); color: var(--muted); padding: 3px 9px; font-size: 12px; }
 .eyebrow {
   font-size: 12px;
   font-weight: 600;
@@ -275,7 +294,7 @@ em {
 .feature-content h2 a:hover {
   color: var(--green);
 }
-.feature-content h3 {
+.feature-content .feature-title {
   font-family: var(--serif);
   font-size: 25px;
   line-height: 1.25;
@@ -1290,7 +1309,7 @@ em {
   .feature-content h2 {
     font-size: 49px;
   }
-  .feature-content h3 {
+  .feature-content .feature-title {
     font-size: 25px;
   }
   .feature-content > p {
@@ -1603,7 +1622,7 @@ em {
   .feature-content h2 {
     font-size: 45px;
   }
-  .feature-content h3 {
+  .feature-content .feature-title {
     font-size: 24px;
   }
   .feature-label > .eyebrow {

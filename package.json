@@ -4,9 +4,12 @@
   "description": "Independent financial research and essays by Khushal Dangar",
   "scripts": {
     "dev": "next dev",
+    "prebuild": "node scripts/generate-social-images.mjs",
     "build": "next build",
+    "build:public": "node scripts/check-public-launch.mjs && npm run build",
     "start": "node scripts/serve.mjs",
     "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
     "test:e2e": "playwright test"
   },
   "dependencies": {
@@ -29,7 +32,9 @@
     "@types/node": "^26.6.3",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "^16.3.6",
     "tailwindcss": "^4.3.3",
-    "typescript": "^7.0.2"
+    "typescript": "^6.0.3"
   }
 }

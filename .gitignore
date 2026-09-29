@@ -8,3 +8,4 @@ test-results/
 playwright-report/
 .sites-runtime/
 .DS_Store
+public/social/

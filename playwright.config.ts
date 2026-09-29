@@ -5,7 +5,7 @@ export default defineConfig({
   workers: 2,
   reporter: "list",
   webServer: {
-    command: "npm run dev -- --port 3000",
+    command: "npm run build && npm start",
     url: "http://localhost:3000",
     reuseExistingServer: !process.env.CI,
   },

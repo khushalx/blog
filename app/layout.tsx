@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import "@fontsource-variable/newsreader";
 import "@fontsource-variable/newsreader/standard-italic.css";
 import "@fontsource-variable/dm-sans";
@@ -13,6 +14,11 @@ export const metadata: Metadata = {
     template: `%s — ${site.name}`,
   },
   description: site.description,
+  applicationName: site.name,
+  alternates: { types: { "application/rss+xml": "/feed.xml" } },
+  verification: process.env.GOOGLE_SITE_VERIFICATION
+    ? { google: process.env.GOOGLE_SITE_VERIFICATION }
+    : undefined,
   openGraph: {
     type: "website",
     locale: "en_IN",
@@ -20,7 +26,7 @@ export const metadata: Metadata = {
     title: site.name,
     description: site.description,
   },
-  twitter: { card: "summary" },
+  twitter: { card: "summary_large_image" },
 };
 export default function RootLayout({
   children,
@@ -28,6 +34,19 @@ export default function RootLayout({
   return (
     <html lang="en" data-scroll-behavior="smooth">
       <body>
+        {process.env.NODE_ENV === "production" &&
+          process.env.NEXT_PUBLIC_GA_ID &&
+          /^G-[A-Z0-9]+$/.test(process.env.NEXT_PUBLIC_GA_ID) && (
+            <>
+              <Script
+                src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GA_ID}`}
+                strategy="afterInteractive"
+              />
+              <Script id="ga-init" strategy="afterInteractive">
+                {`window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} gtag('js', new Date()); gtag('config', '${process.env.NEXT_PUBLIC_GA_ID}', { anonymize_ip: true });`}
+              </Script>
+            </>
+          )}
         <a className="skip-link" href="#main-content">
           Skip to content
         </a>

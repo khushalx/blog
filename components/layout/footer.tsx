@@ -17,6 +17,11 @@ export function Footer() {
               {item.label}
             </Link>
           ))}
+          <Link href="/author/khushal-dangar/">Author</Link>
+          <Link href="/editorial-policy/">Editorial policy</Link>
+          <Link href="/privacy/">Privacy</Link>
+          <Link href="/disclaimer/">Disclaimer</Link>
+          <a href="/feed.xml" type="application/rss+xml">RSS</a>
           {site.social.map((item) => (
             <a
               key={item.label}

@@ -78,6 +78,10 @@ export default function AboutPage() {
             </ul>
           </div>
           <TextLink href="/research">Explore the research</TextLink>
+          <div className="about-policy-links">
+            <a href="/author/khushal-dangar/">Author profile</a>
+            <a href="/editorial-policy/">Editorial and research policy</a>
+          </div>
         </div>
       </div>
     </div>

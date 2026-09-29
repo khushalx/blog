@@ -13,6 +13,8 @@ export default function NotFound() {
         incomplete.
       </p>
       <TextLink href="/research">Explore the research library</TextLink>
+      <TextLink href="/articles">Browse articles</TextLink>
+      <TextLink href="/">Return home</TextLink>
     </div>
   );
 }

@@ -1,12 +1,14 @@
-import { getAllResearch } from "@/lib/content";
+import { getAllResearch, isIndexable } from "@/lib/content";
 import { ResearchLibrary } from "@/components/research/research-library";
 import { pageMetadata } from "@/lib/content/metadata";
-export const metadata = pageMetadata(
-  "Research",
-  "Independent notes on businesses, industries, valuation and financial markets.",
-  "/research/",
-);
+export async function generateMetadata() {
+  const research = await getAllResearch();
+  return pageMetadata("Research",
+    "Independent notes on businesses, industries, valuation and financial markets.",
+    "/research/", research.some((entry) => isIndexable(entry, "research")));
+}
 export default async function ResearchPage() {
+  const research = await getAllResearch();
   return (
     <div className="shell index-page">
       <header className="page-intro">
@@ -24,11 +26,10 @@ export default async function ResearchPage() {
           </p>
         </div>
       </header>
-      <ResearchLibrary entries={await getAllResearch()} />
-      <p className="library-note">
-        A growing collection of working notes. Sample entries demonstrate the
-        research format; no buy or sell recommendations.
-      </p>
+      <ResearchLibrary entries={research} />
+      {research.some((entry) => entry.demo) && <p className="library-note">
+        Sample entries demonstrate the research format; no buy or sell recommendations.
+      </p>}
     </div>
   );
 }

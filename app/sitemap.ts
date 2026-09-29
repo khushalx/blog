@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
-import { getAllResearch, getAllArticles } from "@/lib/content";
-import { site } from "@/lib/site";
+import { getAllResearch, getAllArticles, isIndexable } from "@/lib/content";
+import { absoluteUrl } from "@/lib/site";
 export const dynamic = "force-static";
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const [research, articles] = await Promise.all([
@@ -8,15 +8,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     getAllArticles(),
   ]);
   return [
-    ...["/", "/research/", "/articles/", "/about/"].map((path) => ({
-      url: new URL(path, site.url).href,
+    ...["/about/", "/author/khushal-dangar/", "/editorial-policy/", "/disclaimer/", "/privacy/"].map((path) => ({
+      url: absoluteUrl(path),
     })),
-    ...research.map((entry) => ({
-      url: new URL(`/research/${entry.slug}/`, site.url).href,
+    ...((research.some((entry) => isIndexable(entry, "research")) || articles.some((entry) => isIndexable(entry, "articles"))) ? [{ url: absoluteUrl("/") }] : []),
+    ...(research.some((entry) => isIndexable(entry, "research")) ? [{ url: absoluteUrl("/research/") }] : []),
+    ...(articles.some((entry) => isIndexable(entry, "articles")) ? [{ url: absoluteUrl("/articles/") }] : []),
+    ...research.filter((entry) => isIndexable(entry, "research")).map((entry) => ({
+      url: absoluteUrl(`/research/${entry.slug}/`),
       lastModified: entry.updatedAt || entry.publishedAt,
     })),
-    ...articles.map((entry) => ({
-      url: new URL(`/articles/${entry.slug}/`, site.url).href,
+    ...articles.filter((entry) => isIndexable(entry, "articles")).map((entry) => ({
+      url: absoluteUrl(`/articles/${entry.slug}/`),
       lastModified: entry.updatedAt || entry.publishedAt,
     })),
   ];

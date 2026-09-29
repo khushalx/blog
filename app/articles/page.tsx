@@ -1,11 +1,12 @@
-import { getAllArticles } from "@/lib/content";
+import { getAllArticles, isIndexable } from "@/lib/content";
 import { ArticleEntry } from "@/components/articles/article-entry";
 import { pageMetadata } from "@/lib/content/metadata";
-export const metadata = pageMetadata(
-  "Articles",
-  "Essays and explainers on markets, businesses, investing, economics and financial technology.",
-  "/articles/",
-);
+export async function generateMetadata() {
+  const articles = await getAllArticles();
+  return pageMetadata("Articles",
+    "Essays and explainers on markets, businesses, investing, economics and financial technology.",
+    "/articles/", articles.some((entry) => isIndexable(entry, "articles")));
+}
 export default async function ArticlesPage() {
   const articles = await getAllArticles();
   return (

@@ -6,10 +6,16 @@ import { ArticleEntry } from "@/components/articles/article-entry";
 import { EntryDate, SectionHeading, TextLink } from "@/components/ui/editorial";
 import { pageMetadata } from "@/lib/content/metadata";
 import { site } from "@/lib/site";
-export const metadata = {
-  ...pageMetadata("Independent Financial Research", site.description, "/"),
-  title: { absolute: "The Long View — Independent Financial Research" },
-};
+import { isIndexable } from "@/lib/content";
+import { JsonLd, websiteSchema } from "@/lib/seo/schema";
+export async function generateMetadata() {
+  const [research, articles] = await Promise.all([getAllResearch(), getAllArticles()]);
+  return {
+    ...pageMetadata("Independent Financial Research", site.description, "/",
+      research.some((entry) => isIndexable(entry, "research")) || articles.some((entry) => isIndexable(entry, "articles"))),
+    title: { absolute: "The Long View — Independent Financial Research" },
+  };
+}
 export default async function Home() {
   const [research, articles] = await Promise.all([
     getAllResearch(),
@@ -18,6 +24,7 @@ export default async function Home() {
   const latest = research[0];
   return (
     <div className="shell">
+      <JsonLd data={websiteSchema} />
       <section className="home-intro">
         <div>
           <p className="eyebrow intro-label">
@@ -54,7 +61,7 @@ export default async function Home() {
             <div className="feature-content">
               <div className="feature-label">
                 <span className="eyebrow">COMPANY RESEARCH</span>
-                <span className="sample-tag">Sample note</span>
+                {latest.demo && <span className="sample-tag">Sample note</span>}
               </div>
               <h2>
                 <Link href={`/research/${latest.slug}`}>
@@ -62,7 +69,7 @@ export default async function Home() {
                   <span aria-hidden="true">.</span>
                 </Link>
               </h2>
-              <h3>{latest.title}</h3>
+              <p className="feature-title">{latest.title}</p>
               <p>{latest.description}</p>
               <div className="feature-meta">
                 <span className="ticker">{latest.ticker}</span>

@@ -4,6 +4,10 @@ const paths = [
   "/research/",
   "/articles/",
   "/about/",
+  "/author/khushal-dangar/",
+  "/editorial-policy/",
+  "/disclaimer/",
+  "/privacy/",
   "/research/asian-paints/",
   "/research/hdfc-bank/",
   "/research/tcs/",
@@ -30,17 +34,49 @@ test("every publication route renders with complete metadata and no runtime erro
       "href",
       new RegExp(path.replaceAll("/", "\\/") + "$"),
     );
+    await expect(page.locator('link[rel="alternate"][type="application/rss+xml"]')).toHaveAttribute("href", /\/feed\.xml$/);
     await expect(page.locator('meta[property="og:title"]')).toHaveAttribute(
       "content",
       /\S/,
     );
     await expect(page.locator('meta[name="twitter:card"]')).toHaveAttribute(
       "content",
-      "summary",
+      "summary_large_image",
+    );
+    await expect(page.locator('meta[property="og:image"]')).toHaveAttribute(
+      "content",
+      /\/(?:social-card|social\/(?:articles|research)\/[a-z0-9-]+)\.png$/,
     );
   }
   expect(errors).toEqual([]);
 });
+
+test("LinkedIn profile is available from the publication footer and About page", async ({
+  page,
+}) => {
+  await page.goto("/");
+  const footerLink = page
+    .getByRole("navigation", { name: "Footer navigation" })
+    .getByRole("link", { name: "LinkedIn" });
+  await expect(footerLink).toHaveAttribute(
+    "href",
+    "https://www.linkedin.com/in/khushaldangar/",
+  );
+  await expect(footerLink).toHaveAttribute("target", "_blank");
+  await expect(footerLink).toHaveAttribute("rel", "noreferrer");
+
+  await page.goto("/about/");
+  const aboutLink = page
+    .locator("main")
+    .getByRole("link", { name: "LinkedIn" });
+  await expect(aboutLink).toHaveAttribute(
+    "href",
+    "https://www.linkedin.com/in/khushaldangar/",
+  );
+  await expect(aboutLink).toHaveAttribute("target", "_blank");
+  await expect(aboutLink).toHaveAttribute("rel", "noreferrer");
+});
+
 test("research filters, empty state, table and generated contents work", async ({
   page,
 }) => {
@@ -78,6 +114,10 @@ for (const width of [390, 768, 1440]) {
       "/research/",
       "/articles/",
       "/about/",
+      "/author/khushal-dangar/",
+      "/editorial-policy/",
+      "/disclaimer/",
+      "/privacy/",
       "/research/asian-paints/",
       "/articles/why-high-pe-doesnt-mean-overvalued/",
     ]) {
@@ -125,7 +165,7 @@ for (const width of [390, 768, 1440]) {
     });
   });
 }
-test("all visible internal links resolve and crawler files list every entry", async ({
+test("internal links resolve and only indexable pages enter discovery feeds", async ({
   page,
   request,
 }) => {
@@ -144,8 +184,26 @@ test("all visible internal links resolve and crawler files list every entry", as
   const sitemap = await request.get("/sitemap.xml");
   expect(sitemap.status()).toBe(200);
   const xml = await sitemap.text();
-  for (const path of paths) expect(xml).toContain(path);
+  for (const path of [
+    "/about/", "/author/khushal-dangar/", "/editorial-policy/",
+    "/disclaimer/", "/privacy/",
+  ]) expect(xml).toContain(path);
+  expect(xml).not.toContain("/research/asian-paints/");
+  expect(xml).not.toContain("/articles/why-high-pe-doesnt-mean-overvalued/");
+  const feed = await request.get("/feed.xml");
+  expect(feed.status()).toBe(200);
+  expect(await feed.text()).toContain("<rss version=\"2.0\"");
+  expect(await feed.text()).not.toContain("<item>");
   expect(await (await request.get("/robots.txt")).text()).toContain("Sitemap:");
+  await page.goto("/articles/why-high-pe-doesnt-mean-overvalued/");
+  await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", "noindex, follow");
+  const socialImage = await page.locator('meta[property="og:image"]').getAttribute("content");
+  const imageResponse = await request.get(new URL(socialImage!).pathname);
+  expect(imageResponse.status()).toBe(200);
+  expect(imageResponse.headers()["content-type"]).toContain("image/png");
+  await page.goto("/");
+  const websiteSchema = JSON.parse(await page.locator('script[type="application/ld+json"]').first().textContent() || "{}");
+  expect(websiteSchema["@type"]).toBe("WebSite");
   expect((await request.get("/research/not-a-real-report/")).status()).toBe(
     404,
   );

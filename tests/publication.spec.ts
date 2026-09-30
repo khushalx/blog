@@ -1,8 +1,9 @@
 import { test, expect } from "@playwright/test";
 
 const articlePath = "/articles/revenue-growth-without-cash-growth/";
+const latestArticlePath = "/articles/good-business-two-different-returns/";
 const paths = [
-  "/", "/research/", "/articles/", articlePath, "/about/",
+  "/", "/research/", "/articles/", articlePath, latestArticlePath, "/about/",
   "/author/khushal-dangar/", "/editorial-policy/",
   "/disclaimer/", "/privacy/",
 ];
@@ -29,10 +30,11 @@ test("demo content is gone and the empty research library remains useful", async
   await page.goto("/");
   await expect(page.getByRole("heading", { name: "Latest research" })).toHaveCount(0);
   await expect(page.getByRole("link", { name: "Revenue Grew. Cash Didn’t Follow.", exact: true })).toBeVisible();
+  await expect(page.getByRole("link", { name: "A Good Business, Two Different Returns", exact: true })).toBeVisible();
   await page.goto("/research/");
   await expect(page.getByRole("heading", { name: "Careful work takes time." })).toBeVisible();
   await expect(page.locator(".research-entry")).toHaveCount(0);
-  await expect(page.getByRole("link", { name: /Read the latest article/ })).toHaveAttribute("href", articlePath);
+  await expect(page.getByRole("link", { name: /Read the latest article/ })).toHaveAttribute("href", latestArticlePath);
   for (const path of [
     "/research/asian-paints/", "/research/hdfc-bank/", "/research/tcs/",
     "/research/__no_research__/",
@@ -40,6 +42,27 @@ test("demo content is gone and the empty research library remains useful", async
     "/articles/understanding-roce/", "/articles/how-interest-rates-flow/",
     "/articles/revenue-growth-and-shareholder-value/",
   ]) expect((await request.get(path)).status(), path).toBe(404);
+});
+
+test("the new article separates reported economics from the hypothetical share-price outcome", async ({ page }) => {
+  await page.goto(latestArticlePath);
+  await expect(page.getByRole("heading", { name: "A Good Business, Two Different Returns" })).toBeVisible();
+  await expect(page.locator(".prose table")).toContainText("331.8");
+  await expect(page.locator(".prose table")).toContainText("115.9");
+  await expect(page.locator(".source-references a")).toHaveAttribute(
+    "href", "https://www.sec.gov/Archives/edgar/data/789019/000119312526323660/msft-20260630.htm",
+  );
+  const lens = page.getByRole("figure", { name: "Illustrative share-price outcome at two purchase valuations" });
+  await expect(lens.getByRole("button", { name: "Buy at 20× earnings" })).toHaveAttribute("aria-pressed", "true");
+  await expect(lens.locator(".price-lens-outcome")).toContainText("₹200.00");
+  await expect(lens.locator(".price-lens-outcome")).toContainText("₹440.59");
+  await expect(lens.locator(".price-lens-outcome")).toContainText("+17.1%");
+  await lens.getByRole("button", { name: "Buy at 40× earnings" }).click();
+  await expect(lens.getByRole("button", { name: "Buy at 40× earnings" })).toHaveAttribute("aria-pressed", "true");
+  await expect(lens.locator(".price-lens-outcome")).toContainText("₹400.00");
+  await expect(lens.locator(".price-lens-outcome")).toContainText("₹440.59");
+  await expect(lens.locator(".price-lens-outcome")).toContainText("+2.0%");
+  await expect(page.locator(".related-content").getByRole("link", { name: /Revenue Grew/ })).toHaveAttribute("href", articlePath);
 });
 
 test("the article explains sourced figures and its comparison works", async ({ page }) => {
@@ -76,7 +99,7 @@ test("LinkedIn links use the requested profile", async ({ page }) => {
 for (const width of [320, 390, 768, 1440]) {
   test("publication and article fit " + width + "px", async ({ page }) => {
     await page.setViewportSize({ width, height: 900 });
-    for (const path of ["/", "/research/", "/articles/", articlePath, "/about/"]) {
+    for (const path of ["/", "/research/", "/articles/", articlePath, latestArticlePath, "/about/"]) {
       await page.goto(path);
       await page.evaluate(() => document.fonts.ready);
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), path).toBe(true);
@@ -93,12 +116,14 @@ for (const width of [320, 390, 768, 1440]) {
     }
     await page.goto(articlePath);
     await page.screenshot({ path: "test-results/article-" + width + ".png", fullPage: true });
+    await page.goto(latestArticlePath);
+    await page.screenshot({ path: "test-results/latest-article-" + width + ".png", fullPage: true });
   });
 }
 
 test("internal links, sitemap, feed and article social image resolve", async ({ page, request }) => {
   const links = new Set<string>();
-  for (const path of ["/", "/research/", "/articles/", articlePath, "/about/"]) {
+  for (const path of ["/", "/research/", "/articles/", articlePath, latestArticlePath, "/about/"]) {
     await page.goto(path);
     for (const href of await page.locator('a[href^="/"]').evaluateAll((elements) =>
       elements.map((element) => element.getAttribute("href")!),
@@ -107,11 +132,13 @@ test("internal links, sitemap, feed and article social image resolve", async ({ 
   for (const href of links) expect((await request.get(href)).status(), href).toBe(200);
   const sitemap = await (await request.get("/sitemap.xml")).text();
   expect(sitemap).toContain(articlePath);
+  expect(sitemap).toContain(latestArticlePath);
   expect(sitemap).not.toContain("/research/__no_research__/");
   expect(sitemap).not.toContain("/research/asian-paints/");
   const feed = await (await request.get("/feed.xml")).text();
   expect(feed).toContain("<item>");
   expect(feed).toContain(articlePath);
+  expect(feed).toContain(latestArticlePath);
   expect(await (await request.get("/robots.txt")).text()).toContain("Sitemap:");
   await page.goto(articlePath);
   await expect(page.locator('meta[name="robots"]')).not.toHaveAttribute("content", /noindex/);

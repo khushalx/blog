@@ -2,6 +2,7 @@ import type { ComponentProps, ReactNode } from "react";
 import type { MDXComponents } from "mdx/types";
 import Image from "next/image";
 import { CashFlowLens } from "@/components/articles/cash-flow-lens";
+import { PriceOutcomeLens } from "@/components/articles/price-outcome-lens";
 export function ResearchCallout({
   title = "The key idea",
   children,
@@ -165,6 +166,7 @@ export const mdxComponents: MDXComponents = {
   Sources,
   Figure,
   CashFlowLens,
+  PriceOutcomeLens,
   table: (props: ComponentProps<"table">) => (
     <TableFrame label="Article data table">
       <table {...props} />

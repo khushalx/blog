@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Script from "next/script";
+import { Analytics } from "@vercel/analytics/next";
 import "@fontsource-variable/newsreader";
 import "@fontsource-variable/newsreader/standard-italic.css";
 import "@fontsource-variable/dm-sans";
@@ -53,6 +54,7 @@ export default function RootLayout({
         <Header />
         <main id="main-content">{children}</main>
         <Footer />
+        <Analytics />
       </body>
     </html>
   );

@@ -2,8 +2,9 @@ import { test, expect } from "@playwright/test";
 
 const articlePath = "/articles/revenue-growth-without-cash-growth/";
 const latestArticlePath = "/articles/good-business-two-different-returns/";
+const newestArticlePath = "/articles/when-a-digital-payment-looks-free/";
 const paths = [
-  "/", "/research/", "/articles/", articlePath, latestArticlePath, "/about/",
+  "/", "/research/", "/articles/", articlePath, latestArticlePath, newestArticlePath, "/about/",
   "/author/khushal-dangar/", "/editorial-policy/",
   "/disclaimer/", "/privacy/",
 ];
@@ -31,10 +32,11 @@ test("demo content is gone and the empty research library remains useful", async
   await expect(page.getByRole("heading", { name: "Latest research" })).toHaveCount(0);
   await expect(page.getByRole("link", { name: "Revenue Grew. Cash Didn’t Follow.", exact: true })).toBeVisible();
   await expect(page.getByRole("link", { name: "A Good Business, Two Different Returns", exact: true })).toBeVisible();
+  await expect(page.getByRole("link", { name: "When a Digital Payment Looks Free, Who Keeps It Running?", exact: true })).toBeVisible();
   await page.goto("/research/");
   await expect(page.getByRole("heading", { name: "Careful work takes time." })).toBeVisible();
   await expect(page.locator(".research-entry")).toHaveCount(0);
-  await expect(page.getByRole("link", { name: /Read the latest article/ })).toHaveAttribute("href", latestArticlePath);
+  await expect(page.getByRole("link", { name: /Read the latest article/ })).toHaveAttribute("href", newestArticlePath);
   for (const path of [
     "/research/asian-paints/", "/research/hdfc-bank/", "/research/tcs/",
     "/research/__no_research__/",
@@ -42,6 +44,24 @@ test("demo content is gone and the empty research library remains useful", async
     "/articles/understanding-roce/", "/articles/how-interest-rates-flow/",
     "/articles/revenue-growth-and-shareholder-value/",
   ]) expect((await request.get(path)).status(), path).toBe(404);
+});
+
+test("the UPI article explains current charges and its payment comparison works", async ({ page }) => {
+  await page.goto(newestArticlePath);
+  await expect(page.getByRole("heading", { name: "When a Digital Payment Looks Free, Who Keeps It Running?" })).toBeVisible();
+  await expect(page.locator(".prose")).toContainText("96% of merchant transactions");
+  await expect(page.locator(".prose")).toContainText("FY2024–25");
+  await expect(page.locator(".source-references a").first()).toHaveAttribute(
+    "href", "https://www.pib.gov.in/PressReleseDetailm.aspx?PRID=2310586&lang=1&reg=3",
+  );
+  const lens = page.getByRole("figure", { name: "Compare who pays for four UPI payment situations" });
+  await expect(lens.getByRole("button", { name: "Buy from a shop ₹300" })).toHaveAttribute("aria-pressed", "true");
+  await expect(lens.locator(".payment-lens-result")).toContainText("₹0");
+  await lens.getByRole("button", { name: "Pay a large retailer ₹5,000" }).click();
+  await expect(lens.locator(".payment-lens-result")).toContainText("₹20");
+  await lens.getByRole("button", { name: "Pay an eligible small merchant ₹5,000" }).click();
+  await expect(lens.locator(".payment-lens-result")).toContainText("Classification matters");
+  await expect(lens.locator(".payment-lens-result")).not.toContainText("₹20");
 });
 
 test("the new article separates reported economics from the hypothetical share-price outcome", async ({ page }) => {
@@ -99,7 +119,7 @@ test("LinkedIn links use the requested profile", async ({ page }) => {
 for (const width of [320, 390, 768, 1440]) {
   test("publication and article fit " + width + "px", async ({ page }) => {
     await page.setViewportSize({ width, height: 900 });
-    for (const path of ["/", "/research/", "/articles/", articlePath, latestArticlePath, "/about/"]) {
+    for (const path of ["/", "/research/", "/articles/", articlePath, latestArticlePath, newestArticlePath, "/about/"]) {
       await page.goto(path);
       await page.evaluate(() => document.fonts.ready);
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), path).toBe(true);
@@ -118,12 +138,14 @@ for (const width of [320, 390, 768, 1440]) {
     await page.screenshot({ path: "test-results/article-" + width + ".png", fullPage: true });
     await page.goto(latestArticlePath);
     await page.screenshot({ path: "test-results/latest-article-" + width + ".png", fullPage: true });
+    await page.goto(newestArticlePath);
+    await page.screenshot({ path: "test-results/upi-article-" + width + ".png", fullPage: true });
   });
 }
 
 test("internal links, sitemap, feed and article social image resolve", async ({ page, request }) => {
   const links = new Set<string>();
-  for (const path of ["/", "/research/", "/articles/", articlePath, latestArticlePath, "/about/"]) {
+  for (const path of ["/", "/research/", "/articles/", articlePath, latestArticlePath, newestArticlePath, "/about/"]) {
     await page.goto(path);
     for (const href of await page.locator('a[href^="/"]').evaluateAll((elements) =>
       elements.map((element) => element.getAttribute("href")!),
@@ -133,12 +155,14 @@ test("internal links, sitemap, feed and article social image resolve", async ({ 
   const sitemap = await (await request.get("/sitemap.xml")).text();
   expect(sitemap).toContain(articlePath);
   expect(sitemap).toContain(latestArticlePath);
+  expect(sitemap).toContain(newestArticlePath);
   expect(sitemap).not.toContain("/research/__no_research__/");
   expect(sitemap).not.toContain("/research/asian-paints/");
   const feed = await (await request.get("/feed.xml")).text();
   expect(feed).toContain("<item>");
   expect(feed).toContain(articlePath);
   expect(feed).toContain(latestArticlePath);
+  expect(feed).toContain(newestArticlePath);
   expect(await (await request.get("/robots.txt")).text()).toContain("Sitemap:");
   await page.goto(articlePath);
   await expect(page.locator('meta[name="robots"]')).not.toHaveAttribute("content", /noindex/);

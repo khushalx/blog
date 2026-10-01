@@ -3,6 +3,7 @@ import type { MDXComponents } from "mdx/types";
 import Image from "next/image";
 import { CashFlowLens } from "@/components/articles/cash-flow-lens";
 import { PriceOutcomeLens } from "@/components/articles/price-outcome-lens";
+import { PaymentCostLens } from "@/components/articles/payment-cost-lens";
 export function ResearchCallout({
   title = "The key idea",
   children,
@@ -167,6 +168,7 @@ export const mdxComponents: MDXComponents = {
   Figure,
   CashFlowLens,
   PriceOutcomeLens,
+  PaymentCostLens,
   table: (props: ComponentProps<"table">) => (
     <TableFrame label="Article data table">
       <table {...props} />

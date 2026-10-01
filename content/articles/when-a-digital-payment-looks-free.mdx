@@ -1,0 +1,78 @@
+---
+title: "When a Digital Payment Looks Free, Who Keeps It Running?"
+slug: "when-a-digital-payment-looks-free"
+description: "A UPI payment can cost the customer nothing and still take a network of banks, apps and infrastructure to complete. Here is how the bill is shared."
+category: "FinTech"
+tags: ["UPI", "payments", "digital infrastructure", "merchant fees"]
+publishedAt: "2026-10-01"
+readingTime: 6
+featured: true
+demo: false
+draft: false
+noindex: false
+sources:
+  - name: "Ministry of Finance, Government of India"
+    title: "UPI Continues to Remain Free for Peer to Peer Transactions and 96% of Merchant Transactions"
+    url: "https://www.pib.gov.in/PressReleseDetailm.aspx?PRID=2310586&lang=1&reg=3"
+    publishedAt: "2026-09-15"
+    accessedAt: "2026-10-01"
+  - name: "National Payments Corporation of India"
+    title: "UPI product statistics"
+    url: "https://www.npci.org.in/product/upi/product-statistics"
+    accessedAt: "2026-10-01"
+  - name: "National Payments Corporation of India"
+    title: "UPI product booklet: participants in the ecosystem"
+    url: "https://www.npci.org.in/PDF/npci/upi/Product-Booklet.pdf"
+    accessedAt: "2026-10-01"
+  - name: "Ministry of Finance, Government of India"
+    title: "Cabinet approves incentive scheme for low-value BHIM-UPI merchant transactions, FY2024–25"
+    url: "https://www.pib.gov.in/PressReleasePage.aspx?PRID=2112874&lang=2&reg=48"
+    publishedAt: "2025-03-19"
+    accessedAt: "2026-10-01"
+---
+
+You scan a QR code, pay ₹300 for lunch and hear the confirmation sound. Your bank shows ₹300 gone. The restaurant sees a payment. Nobody stopped you to ask for a processing fee.
+
+It feels as though the payment cost nothing. It did not. Someone had to make sure the app could find the right account, the sending bank could authorise the debit, the network could carry the message and the receiving bank could credit the money. Someone also has to keep all of that working the next time you scan.
+
+**Free to use is a price. It is not a description of the work behind the payment.**
+
+## The people behind one tap
+
+Take an ordinary bank-account UPI payment. The app gives you a usable interface. Your bank checks and debits your account. The recipient’s bank credits theirs. The National Payments Corporation of India (NPCI) operates and coordinates the UPI network connecting those participants. A merchant payment also involves onboarding and support on the receiving side. [NPCI’s description of the ecosystem](https://www.npci.org.in/PDF/npci/upi/Product-Booklet.pdf) separates these roles because they are not always performed by the same company.
+
+The difficult work is mostly invisible when everything goes right. Banks and payment providers still need capacity for a crowded evening, systems for failed transactions and reconciliation when a payment appears to be stuck. A confirmation screen is the final few seconds of a much larger operation.
+
+Scale makes this more than a theoretical cost question. [NPCI recorded about 24.5 billion UPI transactions in August 2026](https://www.npci.org.in/product/upi/product-statistics). A tiny cost or failure rate, repeated that many times, becomes significant. The public statistics show volume; they do **not** tell us the true cost of processing any particular ₹300 payment.
+
+## “Free” depends on which payment you mean
+
+India’s [September 2026 UPI framework](https://www.pib.gov.in/PressReleseDetailm.aspx?PRID=2310586&lang=1&reg=3) makes this distinction unusually clear. Person-to-person transfers remain free regardless of amount. Merchant payments up to ₹2,000 carry zero merchant discount rate, or **MDR**. An eligible small merchant in the P2PM category, receiving up to ₹1 lakh a month through UPI QR codes, remains at zero MDR even for a larger payment.
+
+For standard merchant payments above ₹2,000 that fall outside those protections, the framework sets MDR at **0.4%**, capped at ₹300 for payments of ₹75,000 or more. Some categories have special lower charges: for example, specified essential sectors have a flat ₹5 charge on qualifying payments above ₹2,000. The Ministry says about **96% of merchant transactions** are unaffected. MDR is a charge within the merchant-payment system; it is **not** a fee added to the customer’s UPI payment.
+
+See how the answer changes when the amount and the recipient change:
+
+<PaymentCostLens />
+
+The ₹20 in the large-retailer example is simple arithmetic: 0.4% of ₹5,000. It is **not** an estimate of what that payment cost to process, nor a claim about exactly how much each bank or app receives. The framework says MDR is distributed among payment participants; it does not give us a neat per-payment profit-and-loss statement.
+
+## If nobody pays at the counter, who funds it?
+
+There has not been one permanent answer. Banks and payment companies incur costs to build and run their systems. They may support those costs from their wider businesses. Public incentives have also helped: the government’s **FY2024–25** scheme allocated an estimated ₹1,500 crore to support eligible low-value merchant payments, with a 0.15% incentive for qualifying transactions at small merchants. That scheme covered a **past financial year**; it should not be read as a promise that each free payment today earns the same subsidy.
+
+The September 2026 framework adds another source for some merchant payments. Its MDR on covered larger transactions is shared among ecosystem participants, and an amount equivalent to 5% of total MDR collections is intended for a fund to support small-merchant UPI adoption. That is **system-level funding**, not a traceable ₹20 transfer from one particular retailer to one particular ₹300 lunch payment.
+
+This is why “Who pays?” needs a second question: **which costs?** The app has product and support costs. Banks maintain accounts, fraud controls and transaction systems. The network has to stay available. A merchant may also buy optional services around acceptance. The public MDR rate tells us a price for certain transactions. It does not reveal every participant’s operating cost, cross-subsidy or margin.
+
+## The trade-off worth watching
+
+Keeping payments free for individuals and small merchants makes it easier to join the system. That matters: a QR code is more useful when both sides expect the other to accept it. But if the institutions doing the work cannot fund reliability, an apparently free payment can become expensive in a different way—through failures, delays or poor support.
+
+The new framework is an attempt to place some of the bill on a narrow set of larger merchant transactions while leaving everyday use largely untouched. Whether it works should be judged by more than the MDR percentage. Are payments dependable at busy times? Are disputes resolved? Can smaller merchants still accept payments easily? Do banks and apps have room to improve the service?
+
+The next time a payment says **₹0 fee**, take that statement literally—and only that literally. You were not charged for using it. The infrastructure still has to be paid for, maintained and trusted tomorrow.
+
+<SourceNote>
+  Policy and transaction-volume figures are current to 1 October 2026. The four-payment comparison is illustrative and assumes ordinary bank-account UPI; a merchant’s classification and payment category determine the actual MDR. The FY2024–25 incentive scheme is described as historical context, not a current per-transaction payment.
+</SourceNote>

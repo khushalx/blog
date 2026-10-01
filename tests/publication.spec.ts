@@ -3,8 +3,9 @@ import { test, expect } from "@playwright/test";
 const articlePath = "/articles/revenue-growth-without-cash-growth/";
 const latestArticlePath = "/articles/good-business-two-different-returns/";
 const newestArticlePath = "/articles/when-a-digital-payment-looks-free/";
+const researchPath = "/research/asian-paints/";
 const paths = [
-  "/", "/research/", "/articles/", articlePath, latestArticlePath, newestArticlePath, "/about/",
+  "/", "/research/", "/articles/", articlePath, latestArticlePath, newestArticlePath, researchPath, "/about/",
   "/author/khushal-dangar/", "/editorial-policy/",
   "/disclaimer/", "/privacy/",
 ];
@@ -27,18 +28,21 @@ test("every public route renders with metadata and no runtime errors", async ({ 
   expect(errors).toEqual([]);
 });
 
-test("demo content is gone and the empty research library remains useful", async ({ page, request }) => {
+test("demo content is gone and the published research is discoverable", async ({ page, request }) => {
   await page.goto("/");
-  await expect(page.getByRole("heading", { name: "Latest research" })).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: "Latest research" })).toBeVisible();
   await expect(page.getByRole("link", { name: "Revenue Grew. Cash Didn’t Follow.", exact: true })).toBeVisible();
   await expect(page.getByRole("link", { name: "A Good Business, Two Different Returns", exact: true })).toBeVisible();
   await expect(page.getByRole("link", { name: "When a Digital Payment Looks Free, Who Keeps It Running?", exact: true })).toBeVisible();
   await page.goto("/research/");
-  await expect(page.getByRole("heading", { name: "Careful work takes time." })).toBeVisible();
+  await expect(page.locator(".research-entry")).toHaveCount(1);
+  await expect(page.getByRole("link", { name: "Asian Paints and the Future of Competitive Advantage in the Indian Paint Industry", exact: true })).toHaveAttribute("href", researchPath);
+  await page.getByRole("button", { name: "Consumer", exact: true }).click();
+  await expect(page.locator(".research-entry")).toHaveCount(1);
+  await page.getByRole("button", { name: "Technology", exact: true }).click();
   await expect(page.locator(".research-entry")).toHaveCount(0);
-  await expect(page.getByRole("link", { name: /Read the latest article/ })).toHaveAttribute("href", newestArticlePath);
   for (const path of [
-    "/research/asian-paints/", "/research/hdfc-bank/", "/research/tcs/",
+    "/research/hdfc-bank/", "/research/tcs/",
     "/research/__no_research__/",
     "/articles/why-high-pe-doesnt-mean-overvalued/",
     "/articles/understanding-roce/", "/articles/how-interest-rates-flow/",
@@ -119,7 +123,7 @@ test("LinkedIn links use the requested profile", async ({ page }) => {
 for (const width of [320, 390, 768, 1440]) {
   test("publication and article fit " + width + "px", async ({ page }) => {
     await page.setViewportSize({ width, height: 900 });
-    for (const path of ["/", "/research/", "/articles/", articlePath, latestArticlePath, newestArticlePath, "/about/"]) {
+    for (const path of ["/", "/research/", "/articles/", articlePath, latestArticlePath, newestArticlePath, researchPath, "/about/"]) {
       await page.goto(path);
       await page.evaluate(() => document.fonts.ready);
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), path).toBe(true);
@@ -145,7 +149,7 @@ for (const width of [320, 390, 768, 1440]) {
 
 test("internal links, sitemap, feed and article social image resolve", async ({ page, request }) => {
   const links = new Set<string>();
-  for (const path of ["/", "/research/", "/articles/", articlePath, latestArticlePath, newestArticlePath, "/about/"]) {
+  for (const path of ["/", "/research/", "/articles/", articlePath, latestArticlePath, newestArticlePath, researchPath, "/about/"]) {
     await page.goto(path);
     for (const href of await page.locator('a[href^="/"]').evaluateAll((elements) =>
       elements.map((element) => element.getAttribute("href")!),
@@ -156,13 +160,14 @@ test("internal links, sitemap, feed and article social image resolve", async ({ 
   expect(sitemap).toContain(articlePath);
   expect(sitemap).toContain(latestArticlePath);
   expect(sitemap).toContain(newestArticlePath);
+  expect(sitemap).toContain(researchPath);
   expect(sitemap).not.toContain("/research/__no_research__/");
-  expect(sitemap).not.toContain("/research/asian-paints/");
   const feed = await (await request.get("/feed.xml")).text();
   expect(feed).toContain("<item>");
   expect(feed).toContain(articlePath);
   expect(feed).toContain(latestArticlePath);
   expect(feed).toContain(newestArticlePath);
+  expect(feed).toContain(researchPath);
   expect(await (await request.get("/robots.txt")).text()).toContain("Sitemap:");
   await page.goto(articlePath);
   await expect(page.locator('meta[name="robots"]')).not.toHaveAttribute("content", /noindex/);
@@ -170,4 +175,35 @@ test("internal links, sitemap, feed and article social image resolve", async ({ 
   const imageResponse = await request.get(new URL(socialImage!).pathname);
   expect(imageResponse.status()).toBe(200);
   expect(imageResponse.headers()["content-type"]).toContain("image/png");
+});
+
+
+test("Asian Paints report retains its evidence, downloads and interactive calculations", async ({ page, request }) => {
+  await page.goto(researchPath);
+  await expect(page.locator(".prose")).toContainText("13 Conclusion");
+  await expect(page.locator(".prose")).toContainText("6,651-word");
+  await expect(page.locator(".prose table").first()).toContainText("35,583.54");
+  const history = page.getByRole("figure", { name: "Compare Asian Paints consolidated financial measures" });
+  await history.getByRole("button", { name: "Group PAT", exact: true }).click();
+  await expect(history.locator(".cash-lens-chart")).toContainText("4,394.69");
+  await history.getByRole("button", { name: "PAT margin", exact: true }).click();
+  await expect(history.locator(".cash-lens-chart")).toContainText("12.35%");
+  const scenario = page.getByRole("figure", { name: "Asian Paints educational sensitivity calculation" });
+  await expect(scenario.locator(".asian-paints-scenario-results")).toContainText("6,695.92");
+  await scenario.getByLabel("Revenue change", { exact: true }).fill("10");
+  await scenario.getByLabel("Operating proxy margin change", { exact: true }).fill("-1");
+  const expected = (35583.54 * 1.1 * ((6695.92 / 35583.54 * 100 - 1) / 100)).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  await expect(scenario.locator(".asian-paints-scenario-results")).toContainText(expected);
+  await scenario.getByRole("button", { name: "Reset assumptions" }).click();
+  await expect(scenario.getByLabel("Revenue change", { exact: true })).toHaveValue("0");
+  await expect(scenario.locator(".asian-paints-scenario-results")).toContainText("6,695.92");
+  for (const filename of ["Asian_Paints_Research_Paper.docx", "financial-data.csv", "Asian_Paints_Interactive_Paper.html"]) {
+    const response = await request.get(`/research/asian-paints/${filename}`);
+    expect(response.status(), filename).toBe(200);
+    expect((await response.body()).length).toBeGreaterThan(400);
+  }
+  await page.getByRole("link", { name: "Open the interactive reader", exact: true }).click();
+  await expect(page.locator("#metric")).toBeVisible();
+  await page.locator("#metric").selectOption("pat");
+  await expect(page.locator("#chart-selection")).toContainText("4,394.69");
 });

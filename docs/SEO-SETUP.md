@@ -9,7 +9,7 @@ The site is a Next.js static export. `npm run build` writes files to `out/`. Set
 - `WebSite`, `Person`, `Article` and `BreadcrumbList` JSON-LD where applicable. Demo articles deliberately have no Article JSON-LD.
 - Open Graph and X/Twitter cards use a static 1200 × 630 PNG fallback at `/social-card.png`. Each published entry receives a generated branded PNG in `public/social/` during `npm run build`; a real featured image can override it. The generated directory is intentionally ignored by Git and rebuilt from MDX.
 - Author, editorial policy, disclaimer and privacy pages. Article and research bylines link to the author profile.
-- A demo entry is readable but marked `noindex` and omitted from sitemap and RSS. A draft or future-dated entry is excluded from public lists and generated routes. The publication currently has one sourced article and no research reports. The research index remains available with an honest empty state until the first report is published.
+- A demo entry is readable but marked `noindex` and omitted from sitemap and RSS. A draft or future-dated entry is excluded from public lists and generated routes. The publication includes sourced articles and the Asian Paints company study. The research index lists published reports and supports sector filtering.
 
 ## Add an article or research note
 

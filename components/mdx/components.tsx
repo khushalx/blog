@@ -4,6 +4,7 @@ import Image from "next/image";
 import { CashFlowLens } from "@/components/articles/cash-flow-lens";
 import { PriceOutcomeLens } from "@/components/articles/price-outcome-lens";
 import { PaymentCostLens } from "@/components/articles/payment-cost-lens";
+import { LeaseSpendingLens } from "@/components/articles/lease-spending-lens";
 import { AsianPaintsFinancialLens, AsianPaintsScenario } from "@/components/research/asian-paints-lens";
 export function ResearchCallout({
   title = "The key idea",
@@ -170,6 +171,7 @@ export const mdxComponents: MDXComponents = {
   CashFlowLens,
   PriceOutcomeLens,
   PaymentCostLens,
+  LeaseSpendingLens,
   AsianPaintsFinancialLens,
   AsianPaintsScenario,
   table: (props: ComponentProps<"table">) => (

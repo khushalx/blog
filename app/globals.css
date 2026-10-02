@@ -1323,6 +1323,41 @@ em {
   .price-lens-outcome { grid-template-columns: 1fr; }
   .price-lens-return { border-left: 0; border-top: 1px solid #d2d9ce; padding: 17px 20px; }
 }
+.prose .lease-lens {
+  border-block: 1px solid var(--ink);
+  padding: 24px 0 19px;
+  font: 14px/1.6 var(--sans);
+}
+.prose .lease-lens > .eyebrow { margin-bottom: 5px; }
+.prose .lease-lens h3 { font: 400 30px/1.2 var(--serif); margin: 0 0 9px; letter-spacing: -0.02em; }
+.prose .lease-lens-intro { font: 13px/1.65 var(--sans); color: var(--muted); margin: 0; }
+.lease-lens-choices { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin: 19px 0; }
+.lease-lens-choices button { min-height: 46px; padding: 10px 12px; border: 1px solid var(--line); font-size: 13px; }
+.lease-lens-choices button:hover,
+.lease-lens-choices button[aria-pressed="true"] { background: var(--green); border-color: var(--green); color: var(--paper); }
+.lease-lens-result { background: #eeeee7; padding: 21px; }
+.lease-lens-figures { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px; }
+.lease-lens-figures > div + div { border-left: 1px solid #d2d9ce; padding-left: 22px; }
+.lease-lens-figures span { display: block; color: var(--muted); font-size: 11px; line-height: 1.5; max-width: 190px; }
+.lease-lens-figures strong { display: block; font: 400 37px/1.1 var(--serif); color: var(--green); margin-top: 8px; font-variant-numeric: tabular-nums; }
+.lease-lens-figures small { display: block; font: 11px/1.5 var(--sans); color: var(--muted); margin-top: 3px; }
+.lease-lens-track { width: calc(50% - 11px); height: 5px; background: #d2d9ce; margin-top: 17px; }
+.lease-lens-track > div { height: 100%; background: var(--green); }
+.prose .lease-lens-result p { font: 13px/1.65 var(--sans); margin: 17px 0 0; border-top: 1px solid #d2d9ce; padding-top: 14px; }
+.prose .lease-lens-timeline { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); list-style: none; padding: 0; margin: 19px 0 0; }
+.prose .lease-lens-timeline li { margin: 0; padding: 0 8px; text-align: center; border-left: 1px solid var(--line); }
+.prose .lease-lens-timeline li:first-child { border-left: 0; }
+.lease-lens-timeline span { display: block; color: var(--muted); font-size: 10px; }
+.lease-lens-timeline strong { display: block; font-size: 12px; font-variant-numeric: tabular-nums; margin-top: 3px; white-space: nowrap; }
+.prose .lease-lens figcaption { margin-top: 17px; }
+@media (max-width: 480px) {
+  .lease-lens-result { padding: 17px; }
+  .lease-lens-figures { gap: 13px; }
+  .lease-lens-figures > div + div { padding-left: 13px; }
+  .lease-lens-figures strong { font-size: 31px; }
+  .prose .lease-lens-timeline li { padding-inline: 2px; }
+  .lease-lens-timeline strong { font-size: 10px; }
+}
 .research-empty {
   max-width: 760px;
   border-top: 1px solid var(--ink);

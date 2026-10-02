@@ -3,9 +3,10 @@ import { test, expect } from "@playwright/test";
 const articlePath = "/articles/revenue-growth-without-cash-growth/";
 const latestArticlePath = "/articles/good-business-two-different-returns/";
 const newestArticlePath = "/articles/when-a-digital-payment-looks-free/";
+const aiCapexArticlePath = "/articles/when-ai-capex-falls/";
 const researchPath = "/research/asian-paints/";
 const paths = [
-  "/", "/research/", "/articles/", articlePath, latestArticlePath, newestArticlePath, researchPath, "/about/",
+  "/", "/research/", "/articles/", articlePath, latestArticlePath, newestArticlePath, aiCapexArticlePath, researchPath, "/about/",
   "/author/khushal-dangar/", "/editorial-policy/",
   "/disclaimer/", "/privacy/",
 ];
@@ -34,6 +35,7 @@ test("demo content is gone and the published research is discoverable", async ({
   await expect(page.getByRole("link", { name: "Revenue Grew. Cash Didn’t Follow.", exact: true })).toBeVisible();
   await expect(page.getByRole("link", { name: "A Good Business, Two Different Returns", exact: true })).toBeVisible();
   await expect(page.getByRole("link", { name: "When a Digital Payment Looks Free, Who Keeps It Running?", exact: true })).toBeVisible();
+  await expect(page.getByRole("link", { name: "When AI Capex Falls, Has the Spending Really Fallen?", exact: true })).toBeVisible();
   await page.goto("/research/");
   await expect(page.locator(".research-entry")).toHaveCount(1);
   await expect(page.getByRole("link", { name: "Asian Paints and the Future of Competitive Advantage in the Indian Paint Industry", exact: true })).toHaveAttribute("href", researchPath);
@@ -48,6 +50,23 @@ test("demo content is gone and the published research is discoverable", async ({
     "/articles/understanding-roce/", "/articles/how-interest-rates-flow/",
     "/articles/revenue-growth-and-shareholder-value/",
   ]) expect((await request.get(path)).status(), path).toBe(404);
+});
+
+test("AI capex article distinguishes asset recognition from contractual payments", async ({ page, request }) => {
+  await page.goto(aiCapexArticlePath);
+  const lens = page.getByRole("figure", { name: "Illustrative lease classification and unchanged cash commitment" });
+  await expect(lens.getByRole("button", { name: "Finance lease", exact: true })).toHaveAttribute("aria-pressed", "true");
+  await expect(lens.locator(".lease-lens-figures")).toContainText("₹100");
+  await expect(lens.locator(".lease-lens-figures")).toContainText("₹120");
+  await lens.getByRole("button", { name: "Operating lease", exact: true }).click();
+  await expect(lens.locator(".lease-lens-figures")).toContainText("₹0");
+  await expect(lens.locator(".lease-lens-figures")).toContainText("₹120");
+  await expect(lens.locator(".lease-lens-timeline li")).toHaveCount(5);
+  await expect(page.locator(".prose table")).toContainText("$3.101");
+  await expect(page.locator(".prose")).toContainText("not final 2026 spending totals");
+  await expect(page.locator(".source-references a").first()).toHaveAttribute("href", "https://www.microsoft.com/en-us/Investor/events/fy-2026/earnings-fy-2026-q4");
+  const imageUrl = await page.locator('meta[property="og:image"]').getAttribute("content");
+  expect((await request.get(new URL(imageUrl!).pathname)).status()).toBe(200);
 });
 
 test("the UPI article explains current charges and its payment comparison works", async ({ page }) => {
@@ -123,7 +142,7 @@ test("LinkedIn links use the requested profile", async ({ page }) => {
 for (const width of [320, 390, 768, 1440]) {
   test("publication and article fit " + width + "px", async ({ page }) => {
     await page.setViewportSize({ width, height: 900 });
-    for (const path of ["/", "/research/", "/articles/", articlePath, latestArticlePath, newestArticlePath, researchPath, "/about/"]) {
+    for (const path of ["/", "/research/", "/articles/", articlePath, latestArticlePath, newestArticlePath, aiCapexArticlePath, researchPath, "/about/"]) {
       await page.goto(path);
       await page.evaluate(() => document.fonts.ready);
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), path).toBe(true);
@@ -144,12 +163,14 @@ for (const width of [320, 390, 768, 1440]) {
     await page.screenshot({ path: "test-results/latest-article-" + width + ".png", fullPage: true });
     await page.goto(newestArticlePath);
     await page.screenshot({ path: "test-results/upi-article-" + width + ".png", fullPage: true });
+    await page.goto(aiCapexArticlePath);
+    await page.screenshot({ path: "test-results/ai-capex-" + width + ".png", fullPage: true });
   });
 }
 
 test("internal links, sitemap, feed and article social image resolve", async ({ page, request }) => {
   const links = new Set<string>();
-  for (const path of ["/", "/research/", "/articles/", articlePath, latestArticlePath, newestArticlePath, researchPath, "/about/"]) {
+  for (const path of ["/", "/research/", "/articles/", articlePath, latestArticlePath, newestArticlePath, aiCapexArticlePath, researchPath, "/about/"]) {
     await page.goto(path);
     for (const href of await page.locator('a[href^="/"]').evaluateAll((elements) =>
       elements.map((element) => element.getAttribute("href")!),
@@ -160,6 +181,7 @@ test("internal links, sitemap, feed and article social image resolve", async ({ 
   expect(sitemap).toContain(articlePath);
   expect(sitemap).toContain(latestArticlePath);
   expect(sitemap).toContain(newestArticlePath);
+  expect(sitemap).toContain(aiCapexArticlePath);
   expect(sitemap).toContain(researchPath);
   expect(sitemap).not.toContain("/research/__no_research__/");
   const feed = await (await request.get("/feed.xml")).text();
@@ -167,6 +189,7 @@ test("internal links, sitemap, feed and article social image resolve", async ({ 
   expect(feed).toContain(articlePath);
   expect(feed).toContain(latestArticlePath);
   expect(feed).toContain(newestArticlePath);
+  expect(feed).toContain(aiCapexArticlePath);
   expect(feed).toContain(researchPath);
   expect(await (await request.get("/robots.txt")).text()).toContain("Sitemap:");
   await page.goto(articlePath);

@@ -4,8 +4,8 @@ export const site = {
   authorPath: "/author/khushal-dangar/",
   description:
     "Independent research on businesses, markets, valuation and financial technology. Research and essays by Khushal Dangar.",
-  // Set NEXT_PUBLIC_SITE_URL to the public canonical origin before launch.
-  url: (process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000").replace(/\/$/, ""),
+  // Override this origin when deploying the publication under another domain.
+  url: (process.env.NEXT_PUBLIC_SITE_URL || "https://thelongview.vercel.app").replace(/\/$/, ""),
   social: [
     {
       label: "LinkedIn",

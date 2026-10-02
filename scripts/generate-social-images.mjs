@@ -3,6 +3,7 @@ import path from "node:path";
 import React from "react";
 import matter from "gray-matter";
 import { ImageResponse } from "next/og.js";
+import { publicationDate } from "../lib/content/publication-date.mjs";
 
 const output = path.join(process.cwd(), "public", "social");
 await rm(output, { recursive: true, force: true });
@@ -15,7 +16,7 @@ for (const kind of ["articles", "research"]) {
   for (const file of await readdir(directory)) {
     if (!file.endsWith(".mdx")) continue;
     const { data } = matter(await readFile(path.join(directory, file), "utf8"));
-    if (data.draft === true || data.featuredImage || data.publishedAt > new Date().toISOString().slice(0, 10)) continue;
+    if (data.draft === true || data.featuredImage || data.publishedAt > publicationDate()) continue;
     if (typeof data.slug !== "string" || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(data.slug))
       throw new Error(`${file}: invalid slug for social image`);
     const title = kind === "research" ? data.company : data.title;

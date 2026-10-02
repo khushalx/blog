@@ -1,6 +1,7 @@
 import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 import matter from "gray-matter";
+import { publicationDate } from "../lib/content/publication-date.mjs";
 
 const origin = process.env.NEXT_PUBLIC_SITE_URL;
 if (!origin) {
@@ -26,7 +27,7 @@ for (const kind of ["articles", "research"]) {
     if (!file.endsWith(".mdx")) continue;
     const { data } = matter(await readFile(path.join(directory, file), "utf8"));
     if (data.demo !== true && data.draft !== true && data.noindex !== true &&
-        data.publishedAt <= new Date().toISOString().slice(0, 10)) publishable++;
+        data.publishedAt <= publicationDate()) publishable++;
   }
 }
 if (!publishable) {

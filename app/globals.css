@@ -1358,6 +1358,37 @@ em {
   .prose .lease-lens-timeline li { padding-inline: 2px; }
   .lease-lens-timeline strong { font-size: 10px; }
 }
+.prose .buyback-lens {
+  border-block: 1px solid var(--ink);
+  padding: 24px 0 19px;
+  font: 14px/1.6 var(--sans);
+}
+.prose .buyback-lens > .eyebrow { margin-bottom: 5px; }
+.prose .buyback-lens h3 { font: 400 30px/1.2 var(--serif); margin: 0 0 9px; letter-spacing: -0.02em; }
+.prose .buyback-lens-intro { font: 13px/1.65 var(--sans); color: var(--muted); margin: 0; }
+.buyback-lens-choices { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin: 19px 0; }
+.buyback-lens-choices button { min-height: 58px; padding: 9px; border: 1px solid var(--line); font-size: 14px; }
+.buyback-lens-choices small { display: block; font-size: 11px; }
+.buyback-lens-choices button:hover,
+.buyback-lens-choices button[aria-pressed="true"] { background: var(--green); border-color: var(--green); color: var(--paper); }
+.buyback-lens-result { background: #eeeee7; padding: 22px; }
+.buyback-lens-result dl { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; margin: 0; }
+.buyback-lens-result dl > div { min-width: 0; }
+.buyback-lens-result dt { color: var(--muted); font-size: 11px; line-height: 1.5; min-height: 33px; }
+.buyback-lens-result dd { margin: 9px 0 0; font: 400 34px/1.15 var(--serif); color: var(--green); font-variant-numeric: tabular-nums; }
+.buyback-lens-result dd small { display: block; font: 11px/1.5 var(--sans); color: var(--muted); margin-top: 4px; }
+.prose .buyback-lens-result p { font: 13px/1.65 var(--sans); margin: 17px 0 0; border-top: 1px solid #d2d9ce; padding-top: 14px; }
+.buyback-lens-result details { margin-top: 13px; }
+.buyback-lens-result summary { min-height: 44px; display: list-item; padding-block: 11px; cursor: pointer; font-size: 12px; color: var(--green); }
+.prose .buyback-lens-result details p { margin-top: 0; font-size: 12px; }
+.prose .buyback-lens figcaption { margin-top: 17px; }
+@media (max-width: 520px) {
+  .buyback-lens-result { padding: 19px; }
+  .buyback-lens-result dl { grid-template-columns: 1fr; gap: 16px; }
+  .buyback-lens-result dl > div + div { border-top: 1px solid #d2d9ce; padding-top: 15px; }
+  .buyback-lens-result dt { min-height: 0; }
+  .buyback-lens-result dd { margin-top: 5px; }
+}
 .research-empty {
   max-width: 760px;
   border-top: 1px solid var(--ink);

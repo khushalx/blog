@@ -1,12 +1,20 @@
 import { test, expect } from "@playwright/test";
+import { publicationDate } from "../lib/content/publication-date.mjs";
+
+test("publication day changes at India midnight rather than UTC midnight", () => {
+  expect(publicationDate(new Date("2026-10-02T18:29:59Z"))).toBe("2026-10-02");
+  expect(publicationDate(new Date("2026-10-02T18:30:00Z"))).toBe("2026-10-03");
+  expect(publicationDate(new Date("2026-10-03T00:00:00Z"))).toBe("2026-10-03");
+});
 
 const articlePath = "/articles/revenue-growth-without-cash-growth/";
 const latestArticlePath = "/articles/good-business-two-different-returns/";
 const newestArticlePath = "/articles/when-a-digital-payment-looks-free/";
 const aiCapexArticlePath = "/articles/when-ai-capex-falls/";
+const buybackArticlePath = "/articles/what-a-buyback-actually-buys/";
 const researchPath = "/research/asian-paints/";
 const paths = [
-  "/", "/research/", "/articles/", articlePath, latestArticlePath, newestArticlePath, aiCapexArticlePath, researchPath, "/about/",
+  "/", "/research/", "/articles/", articlePath, latestArticlePath, newestArticlePath, aiCapexArticlePath, buybackArticlePath, researchPath, "/about/",
   "/author/khushal-dangar/", "/editorial-policy/",
   "/disclaimer/", "/privacy/",
 ];
@@ -32,10 +40,12 @@ test("every public route renders with metadata and no runtime errors", async ({ 
 test("demo content is gone and the published research is discoverable", async ({ page, request }) => {
   await page.goto("/");
   await expect(page.getByRole("heading", { name: "Latest research" })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Revenue Grew. Cash Didn’t Follow.", exact: true })).toBeVisible();
+  await expect(page.getByRole("link", { name: "What Does a $150 Billion Buyback Actually Buy?", exact: true })).toBeVisible();
   await expect(page.getByRole("link", { name: "A Good Business, Two Different Returns", exact: true })).toBeVisible();
   await expect(page.getByRole("link", { name: "When a Digital Payment Looks Free, Who Keeps It Running?", exact: true })).toBeVisible();
   await expect(page.getByRole("link", { name: "When AI Capex Falls, Has the Spending Really Fallen?", exact: true })).toBeVisible();
+  await page.goto("/articles/");
+  await expect(page.getByRole("link", { name: "Revenue Grew. Cash Didn’t Follow.", exact: true })).toBeVisible();
   await page.goto("/research/");
   await expect(page.locator(".research-entry")).toHaveCount(1);
   await expect(page.getByRole("link", { name: "Asian Paints and the Future of Competitive Advantage in the Indian Paint Industry", exact: true })).toHaveAttribute("href", researchPath);
@@ -50,6 +60,32 @@ test("demo content is gone and the published research is discoverable", async ({
     "/articles/understanding-roce/", "/articles/how-interest-rates-flow/",
     "/articles/revenue-growth-and-shareholder-value/",
   ]) expect((await request.get(path)).status(), path).toBe(404);
+});
+
+test("buyback price changes remaining-owner value even when EPS rises", async ({ page, request }) => {
+  await page.goto(buybackArticlePath);
+  const lens = page.getByRole("figure", { name: "Illustrative buyback price, earnings and remaining-owner value" });
+  await expect(lens.locator("dd").nth(0)).toContainText("10.00");
+  await expect(lens.locator("dd").nth(1)).toContainText("₹11.11");
+  await expect(lens.locator("dd").nth(2)).toContainText("₹100.00");
+  const highPrice = lens.getByRole("button", { name: "Pay ₹200 per share", exact: true });
+  await highPrice.focus();
+  await page.keyboard.press("Enter");
+  await expect(highPrice).toHaveAttribute("aria-pressed", "true");
+  await expect(lens.locator("dd").nth(0)).toContainText("5.00");
+  await expect(lens.locator("dd").nth(1)).toContainText("₹10.53");
+  await expect(lens.locator("dd").nth(2)).toContainText("₹94.74");
+  await lens.getByText("Follow the calculation", { exact: true }).click();
+  await expect(lens.locator("details p")).toBeVisible();
+  await expect(lens.locator("details p")).toContainText("₹9,000 crore");
+  await lens.getByRole("button", { name: "Pay ₹80 per share", exact: true }).click();
+  await expect(lens.locator("dd").nth(0)).toContainText("12.50");
+  await expect(lens.locator("dd").nth(1)).toContainText("₹11.43");
+  await expect(lens.locator("dd").nth(2)).toContainText("₹102.86");
+  await expect(page.locator(".prose")).toContainText("$19.7 billion");
+  await expect(page.locator(".source-references a").first()).toHaveAttribute("href", "https://investor.nvidia.com/news/press-release-details/2026/NVIDIA-Announces-a-150-Billion-Share-Repurchase-Authorization-Increase/default.aspx");
+  const imageUrl = await page.locator('meta[property="og:image"]').getAttribute("content");
+  expect((await request.get(new URL(imageUrl!).pathname)).status()).toBe(200);
 });
 
 test("AI capex article distinguishes asset recognition from contractual payments", async ({ page, request }) => {
@@ -142,7 +178,7 @@ test("LinkedIn links use the requested profile", async ({ page }) => {
 for (const width of [320, 390, 768, 1440]) {
   test("publication and article fit " + width + "px", async ({ page }) => {
     await page.setViewportSize({ width, height: 900 });
-    for (const path of ["/", "/research/", "/articles/", articlePath, latestArticlePath, newestArticlePath, aiCapexArticlePath, researchPath, "/about/"]) {
+    for (const path of ["/", "/research/", "/articles/", articlePath, latestArticlePath, newestArticlePath, aiCapexArticlePath, buybackArticlePath, researchPath, "/about/"]) {
       await page.goto(path);
       await page.evaluate(() => document.fonts.ready);
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), path).toBe(true);
@@ -165,12 +201,15 @@ for (const width of [320, 390, 768, 1440]) {
     await page.screenshot({ path: "test-results/upi-article-" + width + ".png", fullPage: true });
     await page.goto(aiCapexArticlePath);
     await page.screenshot({ path: "test-results/ai-capex-" + width + ".png", fullPage: true });
+    await page.goto(buybackArticlePath);
+    await page.screenshot({ path: "test-results/buyback-" + width + ".png", fullPage: true });
+    await page.locator(".buyback-lens").screenshot({ path: "test-results/buyback-lens-" + width + ".png" });
   });
 }
 
 test("internal links, sitemap, feed and article social image resolve", async ({ page, request }) => {
   const links = new Set<string>();
-  for (const path of ["/", "/research/", "/articles/", articlePath, latestArticlePath, newestArticlePath, aiCapexArticlePath, researchPath, "/about/"]) {
+  for (const path of ["/", "/research/", "/articles/", articlePath, latestArticlePath, newestArticlePath, aiCapexArticlePath, buybackArticlePath, researchPath, "/about/"]) {
     await page.goto(path);
     for (const href of await page.locator('a[href^="/"]').evaluateAll((elements) =>
       elements.map((element) => element.getAttribute("href")!),
@@ -182,6 +221,7 @@ test("internal links, sitemap, feed and article social image resolve", async ({ 
   expect(sitemap).toContain(latestArticlePath);
   expect(sitemap).toContain(newestArticlePath);
   expect(sitemap).toContain(aiCapexArticlePath);
+  expect(sitemap).toContain(buybackArticlePath);
   expect(sitemap).toContain(researchPath);
   expect(sitemap).not.toContain("/research/__no_research__/");
   const feed = await (await request.get("/feed.xml")).text();
@@ -190,6 +230,7 @@ test("internal links, sitemap, feed and article social image resolve", async ({ 
   expect(feed).toContain(latestArticlePath);
   expect(feed).toContain(newestArticlePath);
   expect(feed).toContain(aiCapexArticlePath);
+  expect(feed).toContain(buybackArticlePath);
   expect(feed).toContain(researchPath);
   expect(await (await request.get("/robots.txt")).text()).toContain("Sitemap:");
   await page.goto(articlePath);

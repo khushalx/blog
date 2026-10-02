@@ -3,6 +3,7 @@ import path from "node:path";
 import { cache } from "react";
 import matter from "gray-matter";
 import { articleCategories, sectors, site } from "@/lib/site";
+import { publicationDate } from "./publication-date.mjs";
 export type ContentKind = "research" | "articles";
 export type Source = {
   name: string;
@@ -189,7 +190,7 @@ const load = cache(
     if (new Set(entries.map(({ meta }) => meta.slug)).size !== entries.length)
       throw new Error(`${kind}: duplicate slugs`);
     return entries
-      .filter(({ meta }) => !meta.draft && meta.publishedAt <= new Date().toISOString().slice(0, 10))
+      .filter(({ meta }) => !meta.draft && meta.publishedAt <= publicationDate())
       .sort((a, b) => b.meta.publishedAt.localeCompare(a.meta.publishedAt));
   },
 );

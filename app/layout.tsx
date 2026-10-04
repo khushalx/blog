@@ -8,6 +8,7 @@ import "./globals.css";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { site } from "@/lib/site";
+import { themeInitScript } from "@/lib/theme";
 export const metadata: Metadata = {
   metadataBase: new URL(site.url),
   title: {
@@ -33,7 +34,10 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" data-scroll-behavior="smooth">
+    <html lang="en" data-scroll-behavior="smooth" suppressHydrationWarning>
+      <head>
+        <script id="theme-init" dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+      </head>
       <body>
         {process.env.NODE_ENV === "production" &&
           process.env.NEXT_PUBLIC_GA_ID &&

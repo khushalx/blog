@@ -12,9 +12,10 @@ const latestArticlePath = "/articles/good-business-two-different-returns/";
 const newestArticlePath = "/articles/when-a-digital-payment-looks-free/";
 const aiCapexArticlePath = "/articles/when-ai-capex-falls/";
 const buybackArticlePath = "/articles/what-a-buyback-actually-buys/";
+const marginArticlePath = "/articles/when-better-margins-mean-less-profit/";
 const researchPath = "/research/asian-paints/";
 const paths = [
-  "/", "/research/", "/articles/", articlePath, latestArticlePath, newestArticlePath, aiCapexArticlePath, buybackArticlePath, researchPath, "/about/",
+  "/", "/research/", "/articles/", articlePath, latestArticlePath, newestArticlePath, aiCapexArticlePath, buybackArticlePath, marginArticlePath, researchPath, "/about/",
   "/author/khushal-dangar/", "/editorial-policy/",
   "/disclaimer/", "/privacy/",
 ];
@@ -41,11 +42,12 @@ test("demo content is gone and the published research is discoverable", async ({
   await page.goto("/");
   await expect(page.getByRole("heading", { name: "Latest research" })).toBeVisible();
   await expect(page.getByRole("link", { name: "What Does a $150 Billion Buyback Actually Buy?", exact: true })).toBeVisible();
-  await expect(page.getByRole("link", { name: "A Good Business, Two Different Returns", exact: true })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Nike’s Margin Improved. Why Did Gross Profit Fall?", exact: true })).toBeVisible();
   await expect(page.getByRole("link", { name: "When a Digital Payment Looks Free, Who Keeps It Running?", exact: true })).toBeVisible();
   await expect(page.getByRole("link", { name: "When AI Capex Falls, Has the Spending Really Fallen?", exact: true })).toBeVisible();
   await page.goto("/articles/");
   await expect(page.getByRole("link", { name: "Revenue Grew. Cash Didn’t Follow.", exact: true })).toBeVisible();
+  await expect(page.getByRole("link", { name: "A Good Business, Two Different Returns", exact: true })).toBeVisible();
   await page.goto("/research/");
   await expect(page.locator(".research-entry")).toHaveCount(1);
   await expect(page.getByRole("link", { name: "Asian Paints and the Future of Competitive Advantage in the Indian Paint Industry", exact: true })).toHaveAttribute("href", researchPath);
@@ -60,6 +62,40 @@ test("demo content is gone and the published research is discoverable", async ({
     "/articles/understanding-roce/", "/articles/how-interest-rates-flow/",
     "/articles/revenue-growth-and-shareholder-value/",
   ]) expect((await request.get(path)).status(), path).toBe(404);
+});
+
+test("margin article distinguishes reported results from interactive scenarios", async ({ page, request }) => {
+  await page.goto(marginArticlePath);
+  await expect(page.locator(".prose table")).toContainText("$4,798");
+  await expect(page.locator(".prose table")).toContainText("42.8%");
+  await expect(page.locator(".prose")).toContainText("44.08%");
+  await expect(page.locator(".source-references a").first()).toHaveAttribute("href", "https://investors.nike.com/investors/news-events-and-reports/investor-news/investor-news-details/2026/NIKE-Inc--Reports-Fiscal-2027-First-Quarter-Results/default.aspx");
+  const lens = page.getByRole("figure", { name: "Illustrative revenue, margin and gross profit comparison" });
+  const revenue = lens.getByRole("slider", { name: /^Revenue/ });
+  const margin = lens.getByRole("slider", { name: /^Gross margin/ });
+  await expect(lens.locator("dd").nth(0)).toContainText("₹37.80");
+  await expect(lens.locator("dd").nth(1)).toContainText("44.44%");
+  await margin.fill("44.5");
+  await expect(lens.locator("dd").nth(0)).toContainText("₹40.05");
+  await expect(lens.locator("dd").nth(0)).toContainText("higher");
+  await revenue.fill("100");
+  await margin.fill("40");
+  await expect(lens.locator("dd").nth(0)).toContainText("₹40.00");
+  await expect(lens.locator("dd").nth(0)).toContainText("unchanged");
+  await revenue.focus();
+  await page.keyboard.press("ArrowRight");
+  await expect(revenue).toHaveValue("101");
+  await expect(lens.locator("dd").nth(0)).toContainText("₹40.40");
+  await margin.fill("60");
+  await revenue.fill("120");
+  await expect(lens.locator("dd").nth(0)).toContainText("₹72.00");
+  await lens.getByRole("button", { name: "Reset example", exact: true }).click();
+  await expect(revenue).toHaveValue("90");
+  await expect(margin).toHaveValue("42");
+  await expect(lens.locator("dd").nth(0)).toContainText("₹37.80");
+  await expect(lens.locator("figcaption")).toContainText("not Nike data");
+  const imageUrl = await page.locator('meta[property="og:image"]').getAttribute("content");
+  expect((await request.get(new URL(imageUrl!).pathname)).status()).toBe(200);
 });
 
 test("buyback price changes remaining-owner value even when EPS rises", async ({ page, request }) => {
@@ -178,7 +214,7 @@ test("LinkedIn links use the requested profile", async ({ page }) => {
 for (const width of [320, 390, 768, 1440]) {
   test("publication and article fit " + width + "px", async ({ page }) => {
     await page.setViewportSize({ width, height: 900 });
-    for (const path of ["/", "/research/", "/articles/", articlePath, latestArticlePath, newestArticlePath, aiCapexArticlePath, buybackArticlePath, researchPath, "/about/"]) {
+    for (const path of ["/", "/research/", "/articles/", articlePath, latestArticlePath, newestArticlePath, aiCapexArticlePath, buybackArticlePath, marginArticlePath, researchPath, "/about/"]) {
       await page.goto(path);
       await page.evaluate(() => document.fonts.ready);
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), path).toBe(true);
@@ -204,12 +240,15 @@ for (const width of [320, 390, 768, 1440]) {
     await page.goto(buybackArticlePath);
     await page.screenshot({ path: "test-results/buyback-" + width + ".png", fullPage: true });
     await page.locator(".buyback-lens").screenshot({ path: "test-results/buyback-lens-" + width + ".png" });
+    await page.goto(marginArticlePath);
+    await page.screenshot({ path: "test-results/margin-" + width + ".png", fullPage: true });
+    await page.locator(".margin-pool").screenshot({ path: "test-results/margin-pool-" + width + ".png" });
   });
 }
 
 test("internal links, sitemap, feed and article social image resolve", async ({ page, request }) => {
   const links = new Set<string>();
-  for (const path of ["/", "/research/", "/articles/", articlePath, latestArticlePath, newestArticlePath, aiCapexArticlePath, buybackArticlePath, researchPath, "/about/"]) {
+  for (const path of ["/", "/research/", "/articles/", articlePath, latestArticlePath, newestArticlePath, aiCapexArticlePath, buybackArticlePath, marginArticlePath, researchPath, "/about/"]) {
     await page.goto(path);
     for (const href of await page.locator('a[href^="/"]').evaluateAll((elements) =>
       elements.map((element) => element.getAttribute("href")!),
@@ -222,6 +261,7 @@ test("internal links, sitemap, feed and article social image resolve", async ({ 
   expect(sitemap).toContain(newestArticlePath);
   expect(sitemap).toContain(aiCapexArticlePath);
   expect(sitemap).toContain(buybackArticlePath);
+  expect(sitemap).toContain(marginArticlePath);
   expect(sitemap).toContain(researchPath);
   expect(sitemap).not.toContain("/research/__no_research__/");
   const feed = await (await request.get("/feed.xml")).text();
@@ -231,6 +271,7 @@ test("internal links, sitemap, feed and article social image resolve", async ({ 
   expect(feed).toContain(newestArticlePath);
   expect(feed).toContain(aiCapexArticlePath);
   expect(feed).toContain(buybackArticlePath);
+  expect(feed).toContain(marginArticlePath);
   expect(feed).toContain(researchPath);
   expect(await (await request.get("/robots.txt")).text()).toContain("Sitemap:");
   await page.goto(articlePath);

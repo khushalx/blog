@@ -80,6 +80,7 @@ for (const width of [320, 390, 560, 768, 1440]) {
     await page.setViewportSize({ width, height: 900 });
     await page.emulateMedia({ colorScheme: "dark" });
     for (const path of ["/", "/research/", "/articles/", article,
+      "/articles/when-gold-prices-rise/",
       "/articles/what-a-buyback-actually-buys/", "/articles/when-ai-capex-falls/",
       "/articles/when-a-digital-payment-looks-free/", "/articles/good-business-two-different-returns/",
       "/articles/revenue-growth-without-cash-growth/", research, "/about/", "/privacy/"]) {

@@ -1473,6 +1473,47 @@ em {
   .margin-pool-comparison > div { grid-template-columns: 76px minmax(0, 1fr) 66px; gap: 7px; font-size: 10px; }
   .margin-pool-comparison strong { font-size: 10px; }
 }
+.prose .gold-growth { border-block: 1px solid var(--ink); padding: 24px 0 19px; font: 14px/1.6 var(--sans); }
+.prose .gold-growth > .eyebrow { margin-bottom: 5px; }
+.prose .gold-growth h3 { font: 400 30px/1.2 var(--serif); margin: 0 0 9px; letter-spacing: -0.02em; }
+.prose .gold-growth-intro { font: 13px/1.65 var(--sans); color: var(--muted); margin: 0; }
+.gold-growth-controls { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; margin: 24px 0 16px; }
+.gold-growth-controls label { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 5px 12px; font-size: 13px; }
+.gold-growth-controls label span { color: var(--green); font-weight: 500; font-variant-numeric: tabular-nums; }
+.gold-growth-controls input { display: block; width: 100%; min-height: 44px; margin: 3px 0 0; accent-color: var(--green); cursor: pointer; }
+.gold-growth-range { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); }
+.gold-growth-choices { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+.gold-growth-choices button { min-height: 44px; padding: 9px 12px; border: 1px solid var(--line); background: transparent; font-size: 11px; }
+.gold-growth-choices button:hover, .gold-growth-choices button[aria-pressed="true"] { background: var(--green); color: var(--paper); border-color: var(--green); }
+.gold-growth-controls input:focus-visible, .gold-growth-choices button:focus-visible, .gold-growth-result summary:focus-visible { outline: 2px solid var(--green); outline-offset: 3px; }
+.gold-growth-result { background: var(--surface); padding: 22px; }
+.gold-growth-result dl { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px; margin: 0; }
+.gold-growth-result dt { color: var(--muted); font-size: 11px; line-height: 1.5; }
+.gold-growth-result dd { margin: 9px 0 0; font: 400 36px/1.15 var(--serif); color: var(--green); font-variant-numeric: tabular-nums; }
+.gold-growth-result dd small { display: block; font: 11px/1.5 var(--sans); color: var(--muted); margin-top: 4px; }
+.gold-growth-comparison { border-block: 1px solid var(--surface-line); padding-block: 16px; margin-top: 20px; }
+.prose .gold-growth-comparison p { font: 11px/1.5 var(--sans); color: var(--muted); margin: 0 0 14px; }
+.gold-growth-comparison > div { display: grid; grid-template-columns: 75px minmax(0, 1fr) 42px; align-items: center; gap: 10px; font-size: 11px; }
+.gold-growth-comparison > div + div { margin-top: 13px; }
+.gold-growth-comparison > div > div { position: relative; height: 16px; background: var(--track); }
+.gold-growth-comparison i { display: block; height: 100%; background: var(--green); }
+.gold-growth-comparison > div:nth-of-type(2) i { background: var(--chart-secondary); }
+.gold-growth-comparison b { position: absolute; top: -3px; bottom: -3px; width: 1px; background: var(--ink); }
+.gold-growth-comparison strong { text-align: right; font-size: 11px; font-weight: 500; font-variant-numeric: tabular-nums; }
+.gold-growth-comparison > small { display: block; margin-top: 13px; font-size: 10px; color: var(--muted); }
+.prose .gold-growth-result > p { font: 13px/1.65 var(--sans); margin: 15px 0 0; }
+.gold-growth-result details { margin-top: 10px; }
+.gold-growth-result summary { display: list-item; min-height: 44px; padding-block: 10px; cursor: pointer; color: var(--green); font-size: 12px; }
+.prose .gold-growth-result details p { font: 12px/1.65 var(--sans); margin: 0; }
+.prose .gold-growth figcaption { margin-top: 16px; }
+@media (max-width: 520px) {
+  .gold-growth-controls { grid-template-columns: 1fr; gap: 20px; }
+  .gold-growth-result { padding: 18px; }
+  .gold-growth-result dl { grid-template-columns: 1fr; gap: 19px; }
+  .gold-growth-result dl > div + div { border-top: 1px solid var(--surface-line); padding-top: 17px; }
+  .gold-growth-comparison > div { grid-template-columns: 65px minmax(0, 1fr) 37px; gap: 7px; font-size: 10px; }
+  .gold-growth-comparison strong { font-size: 10px; }
+}
 .research-empty {
   max-width: 760px;
   border-top: 1px solid var(--ink);

@@ -80,7 +80,7 @@ for (const width of [320, 390, 560, 768, 1440]) {
     await page.setViewportSize({ width, height: 900 });
     await page.emulateMedia({ colorScheme: "dark" });
     for (const path of ["/", "/research/", "/articles/", article,
-      "/articles/when-gold-prices-rise/",
+      "/articles/when-gold-prices-rise/", "/articles/why-bank-deposits-matter/",
       "/articles/what-a-buyback-actually-buys/", "/articles/when-ai-capex-falls/",
       "/articles/when-a-digital-payment-looks-free/", "/articles/good-business-two-different-returns/",
       "/articles/revenue-growth-without-cash-growth/", research, "/about/", "/privacy/"]) {
@@ -107,6 +107,9 @@ for (const width of [320, 390, 560, 768, 1440]) {
     });
     await page.screenshot({ path: `test-results/dark-article-${width}.png` });
     await page.locator(".margin-pool").screenshot({ path: `test-results/dark-lens-${width}.png` });
+    await page.goto("/articles/why-bank-deposits-matter/");
+    await page.screenshot({ path: `test-results/deposits-dark-${width}.png` });
+    await page.getByRole("figure", { name: "Illustrative bank deposit funding and interest example" }).screenshot({ path: `test-results/deposits-lens-dark-${width}.png` });
     await page.goto(research);
     await expect(page.locator(".prose table").first()).toHaveCSS("color", "rgb(232, 233, 223)");
     await page.screenshot({ path: `test-results/dark-research-${width}.png` });

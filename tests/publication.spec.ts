@@ -14,9 +14,10 @@ const aiCapexArticlePath = "/articles/when-ai-capex-falls/";
 const buybackArticlePath = "/articles/what-a-buyback-actually-buys/";
 const marginArticlePath = "/articles/when-better-margins-mean-less-profit/";
 const goldArticlePath = "/articles/when-gold-prices-rise/";
+const depositArticlePath = "/articles/why-bank-deposits-matter/";
 const researchPath = "/research/asian-paints/";
 const paths = [
-  "/", "/research/", "/articles/", articlePath, latestArticlePath, newestArticlePath, aiCapexArticlePath, buybackArticlePath, marginArticlePath, goldArticlePath, researchPath, "/about/",
+  "/", "/research/", "/articles/", articlePath, latestArticlePath, newestArticlePath, aiCapexArticlePath, buybackArticlePath, marginArticlePath, goldArticlePath, depositArticlePath, researchPath, "/about/",
   "/author/khushal-dangar/", "/editorial-policy/",
   "/disclaimer/", "/privacy/",
 ];
@@ -45,8 +46,9 @@ test("demo content is gone and the published research is discoverable", async ({
   await expect(page.getByRole("link", { name: "What Does a $150 Billion Buyback Actually Buy?", exact: true })).toBeVisible();
   await expect(page.getByRole("link", { name: "Nike’s Margin Improved. Why Did Gross Profit Fall?", exact: true })).toBeVisible();
   await expect(page.getByRole("link", { name: "When Gold Prices Rise, Is a Jeweller Really Growing?", exact: true })).toBeVisible();
-  await expect(page.getByRole("link", { name: "When AI Capex Falls, Has the Spending Really Fallen?", exact: true })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Why a Bank’s Deposits Matter More Than They Look", exact: true })).toBeVisible();
   await page.goto("/articles/");
+  await expect(page.getByRole("link", { name: "When AI Capex Falls, Has the Spending Really Fallen?", exact: true })).toBeVisible();
   await expect(page.getByRole("link", { name: "When a Digital Payment Looks Free, Who Keeps It Running?", exact: true })).toBeVisible();
   await expect(page.getByRole("link", { name: "Revenue Grew. Cash Didn’t Follow.", exact: true })).toBeVisible();
   await expect(page.getByRole("link", { name: "A Good Business, Two Different Returns", exact: true })).toBeVisible();
@@ -64,6 +66,51 @@ test("demo content is gone and the published research is discoverable", async ({
     "/articles/understanding-roce/", "/articles/how-interest-rates-flow/",
     "/articles/revenue-growth-and-shareholder-value/",
   ]) expect((await request.get(path)).status(), path).toBe(404);
+});
+
+test("deposit article separates the reported funding mix from fictional interest scenarios", async ({ page, request }) => {
+  await page.goto(depositArticlePath);
+  await expect(page.locator(".prose table")).toContainText("33,275");
+  await expect(page.locator(".prose table")).toContainText("31.6%");
+  await expect(page.locator(".source-references a").first()).toHaveAttribute("href", "https://www.sec.gov/Archives/edgar/data/1144967/000119312526413040/d342028dex99.htm");
+  const lens = page.getByRole("figure", { name: "Illustrative bank deposit funding and interest example" });
+  const cost = lens.locator("dd").first();
+  const net = lens.locator("dd").nth(1);
+  const casa = lens.getByRole("slider", { name: /^CASA share/ });
+  const term = lens.getByRole("slider", { name: /^Term deposit rate/ });
+  const yieldInput = lens.getByRole("slider", { name: /^Asset yield/ });
+  await expect(cost).toContainText("₹4.20");
+  await expect(net).toContainText("₹3.80");
+  await lens.getByRole("button", { name: "More CASA", exact: true }).click();
+  await expect(cost).toContainText("₹3.30");
+  await expect(net).toContainText("₹4.70");
+  const reprice = lens.getByRole("button", { name: "Assets reprice first", exact: true });
+  await reprice.focus();
+  await page.keyboard.press("Enter");
+  await expect(reprice).toHaveAttribute("aria-pressed", "true");
+  await expect(cost).toContainText("₹4.20");
+  await expect(net).toContainText("₹2.80");
+  await term.fill("5");
+  await expect(cost).toContainText("₹3.60");
+  await expect(net).toContainText("₹3.40");
+  await casa.focus();
+  await page.keyboard.press("ArrowRight");
+  await expect(casa).toHaveValue("41");
+  await expect(cost).toContainText("₹3.57");
+  await casa.fill("20");
+  await term.fill("8");
+  await yieldInput.fill("6");
+  await expect(cost).toContainText("₹6.70");
+  await expect(net).toContainText("−₹0.70");
+  await lens.getByRole("button", { name: "Starting mix", exact: true }).click();
+  await expect(casa).toHaveValue("40");
+  await expect(term).toHaveValue("6");
+  await expect(yieldInput).toHaveValue("8");
+  await lens.getByText("Follow the interest calculation", { exact: true }).click();
+  await expect(lens.locator("details p")).toContainText("Term deposits: ₹60 crore × 6.0% = ₹3.60 crore");
+  await expect(lens.locator("figcaption")).toContainText("not a complete bank balance sheet or reported net interest margin");
+  const imageUrl = await page.locator('meta[property="og:image"]').getAttribute("content");
+  expect((await request.get(new URL(imageUrl!).pathname)).status()).toBe(200);
 });
 
 test("gold article separates reported buyer commentary from fictional physical volume", async ({ page, request }) => {
@@ -260,7 +307,7 @@ test("LinkedIn links use the requested profile", async ({ page }) => {
 for (const width of [320, 390, 768, 1440]) {
   test("publication and article fit " + width + "px", async ({ page }) => {
     await page.setViewportSize({ width, height: 900 });
-    for (const path of ["/", "/research/", "/articles/", articlePath, latestArticlePath, newestArticlePath, aiCapexArticlePath, buybackArticlePath, marginArticlePath, goldArticlePath, researchPath, "/about/"]) {
+    for (const path of ["/", "/research/", "/articles/", articlePath, latestArticlePath, newestArticlePath, aiCapexArticlePath, buybackArticlePath, marginArticlePath, goldArticlePath, depositArticlePath, researchPath, "/about/"]) {
       await page.goto(path);
       await page.evaluate(() => document.fonts.ready);
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), path).toBe(true);
@@ -292,12 +339,15 @@ for (const width of [320, 390, 768, 1440]) {
     await page.goto(goldArticlePath);
     await page.screenshot({ path: "test-results/gold-" + width + ".png", fullPage: true });
     await page.locator(".gold-growth").screenshot({ path: "test-results/gold-growth-" + width + ".png" });
+    await page.goto(depositArticlePath);
+    await page.screenshot({ path: `test-results/deposits-light-${width}.png` });
+    await page.getByRole("figure", { name: "Illustrative bank deposit funding and interest example" }).screenshot({ path: `test-results/deposits-lens-light-${width}.png` });
   });
 }
 
 test("internal links, sitemap, feed and article social image resolve", async ({ page, request }) => {
   const links = new Set<string>();
-  for (const path of ["/", "/research/", "/articles/", articlePath, latestArticlePath, newestArticlePath, aiCapexArticlePath, buybackArticlePath, marginArticlePath, goldArticlePath, researchPath, "/about/"]) {
+  for (const path of ["/", "/research/", "/articles/", articlePath, latestArticlePath, newestArticlePath, aiCapexArticlePath, buybackArticlePath, marginArticlePath, goldArticlePath, depositArticlePath, researchPath, "/about/"]) {
     await page.goto(path);
     for (const href of await page.locator('a[href^="/"]').evaluateAll((elements) =>
       elements.map((element) => element.getAttribute("href")!),
@@ -312,6 +362,7 @@ test("internal links, sitemap, feed and article social image resolve", async ({ 
   expect(sitemap).toContain(buybackArticlePath);
   expect(sitemap).toContain(marginArticlePath);
   expect(sitemap).toContain(goldArticlePath);
+  expect(sitemap).toContain(depositArticlePath);
   expect(sitemap).toContain(researchPath);
   expect(sitemap).not.toContain("/research/__no_research__/");
   const feed = await (await request.get("/feed.xml")).text();
@@ -323,6 +374,7 @@ test("internal links, sitemap, feed and article social image resolve", async ({ 
   expect(feed).toContain(buybackArticlePath);
   expect(feed).toContain(marginArticlePath);
   expect(feed).toContain(goldArticlePath);
+  expect(feed).toContain(depositArticlePath);
   expect(feed).toContain(researchPath);
   expect(await (await request.get("/robots.txt")).text()).toContain("Sitemap:");
   await page.goto(articlePath);

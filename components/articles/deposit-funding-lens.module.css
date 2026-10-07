@@ -1,0 +1,29 @@
+.lens.lens { border-block: 1px solid var(--ink); padding: 24px 0 19px; font: 14px/1.6 var(--sans); }
+.lens > :global(.eyebrow) { margin-bottom: 5px; }
+.lens h3 { font: 400 30px/1.2 var(--serif); margin: 0 0 9px; letter-spacing: -0.02em; }
+.lens .intro { font: 13px/1.65 var(--sans); color: var(--muted); margin: 0; }
+.controls { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; margin: 24px 0 16px; }
+.controls label { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 5px 8px; font-size: 12px; }
+.controls label span { color: var(--green); font-weight: 500; font-variant-numeric: tabular-nums; }
+.controls input { display: block; width: 100%; min-height: 44px; margin: 3px 0 0; accent-color: var(--green); cursor: pointer; }
+.range { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); }
+.choices { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+.choices button { min-height: 44px; padding: 9px 12px; border: 1px solid var(--line); background: transparent; font-size: 11px; }
+.choices button:hover, .choices button[aria-pressed="true"] { background: var(--green); color: var(--paper); border-color: var(--green); }
+.controls input:focus-visible, .choices button:focus-visible, .result summary:focus-visible { outline: 2px solid var(--green); outline-offset: 3px; }
+.result { background: var(--surface); padding: 22px; }
+.result dl { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px; margin: 0; }
+.result dt { color: var(--muted); font-size: 11px; line-height: 1.5; }
+.result dd { margin: 9px 0 0; font: 400 36px/1.15 var(--serif); color: var(--green); font-variant-numeric: tabular-nums; }
+.result dd small { display: block; font: 11px/1.5 var(--sans); color: var(--muted); margin-top: 4px; }
+.lens .result > p { font: 13px/1.65 var(--sans); margin: 20px 0 0; padding-top: 15px; border-top: 1px solid var(--surface-line); }
+.result details { margin-top: 10px; }
+.result summary { display: list-item; min-height: 44px; padding-block: 10px; cursor: pointer; color: var(--green); font-size: 12px; }
+.lens .result details p { font: 12px/1.65 var(--sans); margin: 0; }
+.lens figcaption { margin-top: 16px; }
+@media (max-width: 560px) {
+  .controls { grid-template-columns: 1fr; gap: 20px; }
+  .result { padding: 18px; }
+  .result dl { grid-template-columns: 1fr; gap: 19px; }
+  .result dl > div + div { border-top: 1px solid var(--surface-line); padding-top: 17px; }
+}

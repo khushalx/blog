@@ -15,9 +15,10 @@ const buybackArticlePath = "/articles/what-a-buyback-actually-buys/";
 const marginArticlePath = "/articles/when-better-margins-mean-less-profit/";
 const goldArticlePath = "/articles/when-gold-prices-rise/";
 const depositArticlePath = "/articles/why-bank-deposits-matter/";
+const storeArticlePath = "/articles/when-a-new-store-pays-back/";
 const researchPath = "/research/asian-paints/";
 const paths = [
-  "/", "/research/", "/articles/", articlePath, latestArticlePath, newestArticlePath, aiCapexArticlePath, buybackArticlePath, marginArticlePath, goldArticlePath, depositArticlePath, researchPath, "/about/",
+  "/", "/research/", "/articles/", articlePath, latestArticlePath, newestArticlePath, aiCapexArticlePath, buybackArticlePath, marginArticlePath, goldArticlePath, depositArticlePath, storeArticlePath, researchPath, "/about/",
   "/author/khushal-dangar/", "/editorial-policy/",
   "/disclaimer/", "/privacy/",
 ];
@@ -43,11 +44,12 @@ test("every public route renders with metadata and no runtime errors", async ({ 
 test("demo content is gone and the published research is discoverable", async ({ page, request }) => {
   await page.goto("/");
   await expect(page.getByRole("heading", { name: "Latest research" })).toBeVisible();
-  await expect(page.getByRole("link", { name: "What Does a $150 Billion Buyback Actually Buy?", exact: true })).toBeVisible();
+  await expect(page.getByRole("link", { name: "A New Store Is an Investment. When Does It Pay Back?", exact: true })).toBeVisible();
   await expect(page.getByRole("link", { name: "Nike’s Margin Improved. Why Did Gross Profit Fall?", exact: true })).toBeVisible();
   await expect(page.getByRole("link", { name: "When Gold Prices Rise, Is a Jeweller Really Growing?", exact: true })).toBeVisible();
   await expect(page.getByRole("link", { name: "Why a Bank’s Deposits Matter More Than They Look", exact: true })).toBeVisible();
   await page.goto("/articles/");
+  await expect(page.getByRole("link", { name: "What Does a $150 Billion Buyback Actually Buy?", exact: true })).toBeVisible();
   await expect(page.getByRole("link", { name: "When AI Capex Falls, Has the Spending Really Fallen?", exact: true })).toBeVisible();
   await expect(page.getByRole("link", { name: "When a Digital Payment Looks Free, Who Keeps It Running?", exact: true })).toBeVisible();
   await expect(page.getByRole("link", { name: "Revenue Grew. Cash Didn’t Follow.", exact: true })).toBeVisible();
@@ -66,6 +68,61 @@ test("demo content is gone and the published research is discoverable", async ({
     "/articles/understanding-roce/", "/articles/how-interest-rates-flow/",
     "/articles/revenue-growth-and-shareholder-value/",
   ]) expect((await request.get(path)).status(), path).toBe(404);
+});
+
+test("store payback includes opening inventory, ramp losses and non-recovery scenarios", async ({ page, request }) => {
+  await page.goto(storeArticlePath);
+  await expect(page.locator(".prose")).toContainText("78 net store additions");
+  await expect(page.locator(".report-byline time")).toHaveAttribute("datetime", "2026-10-08");
+  await expect(page.locator(".source-references a").first()).toHaveAttribute("href", "https://www.titancompany.in/sites/default/files/2026-10/Q2update202627.pdf");
+  const lens = page.getByRole("figure", { name: "Illustrative new store cash payback model" });
+  const cash = lens.locator("dd").first();
+  const payback = lens.locator("dd").nth(1);
+  const inventory = lens.getByRole("slider", { name: /^Opening inventory/ });
+  const sales = lens.getByRole("slider", { name: /^Mature monthly sales/ });
+  const margin = lens.getByRole("slider", { name: /^Gross margin/ });
+  const ramp = lens.getByRole("slider", { name: /^Time to mature sales/ });
+  await expect(cash).toContainText("₹2.80");
+  await expect(payback).toContainText("53 months");
+  await expect(lens.locator("[data-store-result]")).toContainText("₹120.00 lakh");
+  await expect(lens.getByRole("img")).toHaveAttribute("aria-label", /189.00 lakh after ten years/);
+  await lens.getByRole("button", { name: "Slower ramp", exact: true }).click();
+  await expect(payback).toContainText("63 months");
+  await expect(cash).toContainText("₹2.80");
+  const moreStock = lens.getByRole("button", { name: "More stock", exact: true });
+  await moreStock.focus();
+  await page.keyboard.press("Enter");
+  await expect(moreStock).toHaveAttribute("aria-pressed", "true");
+  await expect(payback).toContainText("64 months");
+  await expect(lens.locator("[data-store-result]")).toContainText("₹150.00 lakh");
+  await lens.getByRole("button", { name: "Sales disappoint", exact: true }).click();
+  await expect(cash).toContainText("−₹0.20");
+  await expect(payback).toContainText("No payback");
+  await sales.fill("22");
+  await expect(payback).toContainText("Over 10 years");
+  await expect(cash).toContainText("₹0.40");
+  await sales.fill("20");
+  await margin.fill("31");
+  await expect(payback).toContainText("No payback");
+  await expect(cash).toContainText("₹0.00");
+  await lens.getByRole("button", { name: "Starting store", exact: true }).click();
+  await inventory.focus();
+  await page.keyboard.press("ArrowRight");
+  await expect(inventory).toHaveValue("45");
+  await expect(payback).toContainText("55 months");
+  await inventory.fill("20");
+  await sales.fill("45");
+  await margin.fill("40");
+  await ramp.fill("6");
+  await expect(cash).toContainText("₹11.80");
+  await expect(payback).toContainText("11 months");
+  await expect(payback).not.toContainText("0 years");
+  await lens.getByRole("button", { name: "Starting store", exact: true }).click();
+  await lens.getByText("How the model counts the cash", { exact: true }).click();
+  await expect(lens.locator("details")).toContainText("opening inventory is not deducted again");
+  await expect(lens.locator("figcaption")).toContainText("not Titan or Kalyan store economics");
+  const social = await page.locator('meta[property="og:image"]').getAttribute("content");
+  expect((await request.get(new URL(social!).pathname)).status()).toBe(200);
 });
 
 test("deposit article separates the reported funding mix from fictional interest scenarios", async ({ page, request }) => {
@@ -307,7 +364,7 @@ test("LinkedIn links use the requested profile", async ({ page }) => {
 for (const width of [320, 390, 768, 1440]) {
   test("publication and article fit " + width + "px", async ({ page }) => {
     await page.setViewportSize({ width, height: 900 });
-    for (const path of ["/", "/research/", "/articles/", articlePath, latestArticlePath, newestArticlePath, aiCapexArticlePath, buybackArticlePath, marginArticlePath, goldArticlePath, depositArticlePath, researchPath, "/about/"]) {
+    for (const path of ["/", "/research/", "/articles/", articlePath, latestArticlePath, newestArticlePath, aiCapexArticlePath, buybackArticlePath, marginArticlePath, goldArticlePath, depositArticlePath, storeArticlePath, researchPath, "/about/"]) {
       await page.goto(path);
       await page.evaluate(() => document.fonts.ready);
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), path).toBe(true);
@@ -342,12 +399,15 @@ for (const width of [320, 390, 768, 1440]) {
     await page.goto(depositArticlePath);
     await page.screenshot({ path: `test-results/deposits-light-${width}.png` });
     await page.getByRole("figure", { name: "Illustrative bank deposit funding and interest example" }).screenshot({ path: `test-results/deposits-lens-light-${width}.png` });
+    await page.goto(storeArticlePath);
+    await page.screenshot({ path: `test-results/store-light-${width}.png` });
+    await page.getByRole("figure", { name: "Illustrative new store cash payback model" }).screenshot({ path: `test-results/store-lens-light-${width}.png` });
   });
 }
 
 test("internal links, sitemap, feed and article social image resolve", async ({ page, request }) => {
   const links = new Set<string>();
-  for (const path of ["/", "/research/", "/articles/", articlePath, latestArticlePath, newestArticlePath, aiCapexArticlePath, buybackArticlePath, marginArticlePath, goldArticlePath, depositArticlePath, researchPath, "/about/"]) {
+  for (const path of ["/", "/research/", "/articles/", articlePath, latestArticlePath, newestArticlePath, aiCapexArticlePath, buybackArticlePath, marginArticlePath, goldArticlePath, depositArticlePath, storeArticlePath, researchPath, "/about/"]) {
     await page.goto(path);
     for (const href of await page.locator('a[href^="/"]').evaluateAll((elements) =>
       elements.map((element) => element.getAttribute("href")!),
@@ -363,6 +423,7 @@ test("internal links, sitemap, feed and article social image resolve", async ({ 
   expect(sitemap).toContain(marginArticlePath);
   expect(sitemap).toContain(goldArticlePath);
   expect(sitemap).toContain(depositArticlePath);
+  expect(sitemap).toContain(storeArticlePath);
   expect(sitemap).toContain(researchPath);
   expect(sitemap).not.toContain("/research/__no_research__/");
   const feed = await (await request.get("/feed.xml")).text();
@@ -375,6 +436,7 @@ test("internal links, sitemap, feed and article social image resolve", async ({ 
   expect(feed).toContain(marginArticlePath);
   expect(feed).toContain(goldArticlePath);
   expect(feed).toContain(depositArticlePath);
+  expect(feed).toContain(storeArticlePath);
   expect(feed).toContain(researchPath);
   expect(await (await request.get("/robots.txt")).text()).toContain("Sitemap:");
   await page.goto(articlePath);

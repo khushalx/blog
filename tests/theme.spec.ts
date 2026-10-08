@@ -80,7 +80,7 @@ for (const width of [320, 390, 560, 768, 1440]) {
     await page.setViewportSize({ width, height: 900 });
     await page.emulateMedia({ colorScheme: "dark" });
     for (const path of ["/", "/research/", "/articles/", article,
-      "/articles/when-gold-prices-rise/", "/articles/why-bank-deposits-matter/",
+      "/articles/when-gold-prices-rise/", "/articles/why-bank-deposits-matter/", "/articles/when-a-new-store-pays-back/",
       "/articles/what-a-buyback-actually-buys/", "/articles/when-ai-capex-falls/",
       "/articles/when-a-digital-payment-looks-free/", "/articles/good-business-two-different-returns/",
       "/articles/revenue-growth-without-cash-growth/", research, "/about/", "/privacy/"]) {
@@ -110,6 +110,9 @@ for (const width of [320, 390, 560, 768, 1440]) {
     await page.goto("/articles/why-bank-deposits-matter/");
     await page.screenshot({ path: `test-results/deposits-dark-${width}.png` });
     await page.getByRole("figure", { name: "Illustrative bank deposit funding and interest example" }).screenshot({ path: `test-results/deposits-lens-dark-${width}.png` });
+    await page.goto("/articles/when-a-new-store-pays-back/");
+    await page.screenshot({ path: `test-results/store-dark-${width}.png` });
+    await page.getByRole("figure", { name: "Illustrative new store cash payback model" }).screenshot({ path: `test-results/store-lens-dark-${width}.png` });
     await page.goto(research);
     await expect(page.locator(".prose table").first()).toHaveCSS("color", "rgb(232, 233, 223)");
     await page.screenshot({ path: `test-results/dark-research-${width}.png` });

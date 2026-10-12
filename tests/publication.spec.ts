@@ -16,9 +16,10 @@ const marginArticlePath = "/articles/when-better-margins-mean-less-profit/";
 const goldArticlePath = "/articles/when-gold-prices-rise/";
 const depositArticlePath = "/articles/why-bank-deposits-matter/";
 const storeArticlePath = "/articles/when-a-new-store-pays-back/";
+const recurringArticlePath = "/articles/does-recurring-revenue-make-a-business-predictable/";
 const researchPath = "/research/asian-paints/";
 const paths = [
-  "/", "/research/", "/articles/", articlePath, latestArticlePath, newestArticlePath, aiCapexArticlePath, buybackArticlePath, marginArticlePath, goldArticlePath, depositArticlePath, storeArticlePath, researchPath, "/about/",
+  "/", "/research/", "/articles/", articlePath, latestArticlePath, newestArticlePath, aiCapexArticlePath, buybackArticlePath, marginArticlePath, goldArticlePath, depositArticlePath, storeArticlePath, recurringArticlePath, researchPath, "/about/",
   "/author/khushal-dangar/", "/editorial-policy/",
   "/disclaimer/", "/privacy/",
 ];
@@ -45,10 +46,11 @@ test("demo content is gone and the published research is discoverable", async ({
   await page.goto("/");
   await expect(page.getByRole("heading", { name: "Latest research" })).toBeVisible();
   await expect(page.getByRole("link", { name: "A New Store Is an Investment. When Does It Pay Back?", exact: true })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Nike’s Margin Improved. Why Did Gross Profit Fall?", exact: true })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Does Recurring Revenue Make a Business Predictable?", exact: true })).toBeVisible();
   await expect(page.getByRole("link", { name: "When Gold Prices Rise, Is a Jeweller Really Growing?", exact: true })).toBeVisible();
   await expect(page.getByRole("link", { name: "Why a Bank’s Deposits Matter More Than They Look", exact: true })).toBeVisible();
   await page.goto("/articles/");
+  await expect(page.getByRole("link", { name: "Nike’s Margin Improved. Why Did Gross Profit Fall?", exact: true })).toBeVisible();
   await expect(page.getByRole("link", { name: "What Does a $150 Billion Buyback Actually Buy?", exact: true })).toBeVisible();
   await expect(page.getByRole("link", { name: "When AI Capex Falls, Has the Spending Really Fallen?", exact: true })).toBeVisible();
   await expect(page.getByRole("link", { name: "When a Digital Payment Looks Free, Who Keeps It Running?", exact: true })).toBeVisible();
@@ -68,6 +70,66 @@ test("demo content is gone and the published research is discoverable", async ({
     "/articles/understanding-roce/", "/articles/how-interest-rates-flow/",
     "/articles/revenue-growth-and-shareholder-value/",
   ]) expect((await request.get(path)).status(), path).toBe(404);
+});
+
+test("recurring revenue follows the existing cohort separately from new customers", async ({ page, request }) => {
+  await page.goto(recurringArticlePath);
+  await expect(page.locator(".report-byline time")).toHaveAttribute("datetime", "2026-10-12");
+  await expect(page.locator(".prose table")).toContainText("$6.582 billion");
+  await expect(page.locator(".prose table")).toContainText("$27.50 billion");
+  await expect(page.locator(".source-references a").first()).toHaveAttribute("href", "https://www.sec.gov/Archives/edgar/data/796343/000079634326000147/adbeex991q326.htm");
+  const lens = page.getByRole("figure", { name: "Illustrative recurring revenue retention and price example" });
+  const cohort = lens.locator("dd").first();
+  const total = lens.locator("dd").nth(1);
+  const retention = lens.getByRole("slider", { name: /^Customers renewing/ });
+  const price = lens.getByRole("slider", { name: /^Annual price change/ });
+  const newCustomers = lens.getByRole("slider", { name: /^New customers/ });
+  await expect(cohort).toContainText("₹99.00");
+  await expect(cohort).toContainText("99.0% net revenue retention");
+  await expect(total).toContainText("₹110.00");
+  await expect(total).toContainText("+10.0%");
+  await lens.getByRole("button", { name: "Growth hides churn", exact: true }).click();
+  await expect(cohort).toContainText("₹88.00");
+  await expect(total).toContainText("₹110.00");
+  await expect(lens.locator("[data-recurring-result]")).toContainText("800 original customers renew; 200 leave; 200 new customers join");
+  const offsets = lens.getByRole("button", { name: "Price offsets departures", exact: true });
+  await offsets.focus();
+  await page.keyboard.press("Enter");
+  await expect(offsets).toHaveAttribute("aria-pressed", "true");
+  await expect(cohort).toContainText("100.0% net revenue retention");
+  await expect(total).toContainText("₹100.00");
+  await expect(total).toContainText("unchanged");
+  await expect(lens.locator("[data-recurring-result]")).toContainText("Ending customer count: 800");
+  await newCustomers.fill("100");
+  await expect(cohort).toContainText("₹100.00");
+  await expect(total).toContainText("₹112.50");
+  await retention.fill("50");
+  await price.fill("-10");
+  await newCustomers.fill("0");
+  await expect(cohort).toContainText("₹45.00");
+  await expect(total).toContainText("−55.0%");
+  await retention.fill("100");
+  await price.fill("30");
+  await newCustomers.fill("400");
+  await expect(cohort).toContainText("₹130.00");
+  await expect(total).toContainText("₹182.00");
+  await expect(total).toContainText("+82.0%");
+  await lens.getByRole("button", { name: "Steady renewals", exact: true }).click();
+  await price.focus();
+  await page.keyboard.press("ArrowRight");
+  await expect(price).toHaveValue("1");
+  await expect(cohort).toContainText("₹95.95");
+  await expect(total).toContainText("₹106.05");
+  await lens.getByRole("button", { name: "Starting cohort", exact: true }).click();
+  await expect(retention).toHaveValue("90");
+  await expect(price).toHaveValue("10");
+  await expect(newCustomers).toHaveValue("100");
+  await lens.getByText("Follow the cohort calculation", { exact: true }).click();
+  await expect(lens.locator("details p")).toBeVisible();
+  await expect(lens.locator("details p")).toContainText("New customers contribute ₹11.00 lakh separately");
+  await expect(lens.locator("figcaption")).toContainText("not revenue earned or cash collected during a year");
+  const social = await page.locator('meta[property="og:image"]').getAttribute("content");
+  expect((await request.get(new URL(social!).pathname)).status()).toBe(200);
 });
 
 test("store payback includes opening inventory, ramp losses and non-recovery scenarios", async ({ page, request }) => {
@@ -364,7 +426,7 @@ test("LinkedIn links use the requested profile", async ({ page }) => {
 for (const width of [320, 390, 768, 1440]) {
   test("publication and article fit " + width + "px", async ({ page }) => {
     await page.setViewportSize({ width, height: 900 });
-    for (const path of ["/", "/research/", "/articles/", articlePath, latestArticlePath, newestArticlePath, aiCapexArticlePath, buybackArticlePath, marginArticlePath, goldArticlePath, depositArticlePath, storeArticlePath, researchPath, "/about/"]) {
+    for (const path of ["/", "/research/", "/articles/", articlePath, latestArticlePath, newestArticlePath, aiCapexArticlePath, buybackArticlePath, marginArticlePath, goldArticlePath, depositArticlePath, storeArticlePath, recurringArticlePath, researchPath, "/about/"]) {
       await page.goto(path);
       await page.evaluate(() => document.fonts.ready);
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), path).toBe(true);
@@ -402,12 +464,15 @@ for (const width of [320, 390, 768, 1440]) {
     await page.goto(storeArticlePath);
     await page.screenshot({ path: `test-results/store-light-${width}.png` });
     await page.getByRole("figure", { name: "Illustrative new store cash payback model" }).screenshot({ path: `test-results/store-lens-light-${width}.png` });
+    await page.goto(recurringArticlePath);
+    await page.screenshot({ path: `test-results/recurring-light-${width}.png` });
+    await page.getByRole("figure", { name: "Illustrative recurring revenue retention and price example" }).screenshot({ path: `test-results/recurring-lens-light-${width}.png` });
   });
 }
 
 test("internal links, sitemap, feed and article social image resolve", async ({ page, request }) => {
   const links = new Set<string>();
-  for (const path of ["/", "/research/", "/articles/", articlePath, latestArticlePath, newestArticlePath, aiCapexArticlePath, buybackArticlePath, marginArticlePath, goldArticlePath, depositArticlePath, storeArticlePath, researchPath, "/about/"]) {
+  for (const path of ["/", "/research/", "/articles/", articlePath, latestArticlePath, newestArticlePath, aiCapexArticlePath, buybackArticlePath, marginArticlePath, goldArticlePath, depositArticlePath, storeArticlePath, recurringArticlePath, researchPath, "/about/"]) {
     await page.goto(path);
     for (const href of await page.locator('a[href^="/"]').evaluateAll((elements) =>
       elements.map((element) => element.getAttribute("href")!),
@@ -424,6 +489,7 @@ test("internal links, sitemap, feed and article social image resolve", async ({ 
   expect(sitemap).toContain(goldArticlePath);
   expect(sitemap).toContain(depositArticlePath);
   expect(sitemap).toContain(storeArticlePath);
+  expect(sitemap).toContain(recurringArticlePath);
   expect(sitemap).toContain(researchPath);
   expect(sitemap).not.toContain("/research/__no_research__/");
   const feed = await (await request.get("/feed.xml")).text();
@@ -437,6 +503,7 @@ test("internal links, sitemap, feed and article social image resolve", async ({ 
   expect(feed).toContain(goldArticlePath);
   expect(feed).toContain(depositArticlePath);
   expect(feed).toContain(storeArticlePath);
+  expect(feed).toContain(recurringArticlePath);
   expect(feed).toContain(researchPath);
   expect(await (await request.get("/robots.txt")).text()).toContain("Sitemap:");
   await page.goto(articlePath);

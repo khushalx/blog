@@ -17,9 +17,10 @@ const goldArticlePath = "/articles/when-gold-prices-rise/";
 const depositArticlePath = "/articles/why-bank-deposits-matter/";
 const storeArticlePath = "/articles/when-a-new-store-pays-back/";
 const recurringArticlePath = "/articles/does-recurring-revenue-make-a-business-predictable/";
+const peerArticlePath = "/articles/same-industry-different-economics/";
 const researchPath = "/research/asian-paints/";
 const paths = [
-  "/", "/research/", "/articles/", articlePath, latestArticlePath, newestArticlePath, aiCapexArticlePath, buybackArticlePath, marginArticlePath, goldArticlePath, depositArticlePath, storeArticlePath, recurringArticlePath, researchPath, "/about/",
+  "/", "/research/", "/articles/", articlePath, latestArticlePath, newestArticlePath, aiCapexArticlePath, buybackArticlePath, marginArticlePath, goldArticlePath, depositArticlePath, storeArticlePath, recurringArticlePath, peerArticlePath, researchPath, "/about/",
   "/author/khushal-dangar/", "/editorial-policy/",
   "/disclaimer/", "/privacy/",
 ];
@@ -47,9 +48,10 @@ test("demo content is gone and the published research is discoverable", async ({
   await expect(page.getByRole("heading", { name: "Latest research" })).toBeVisible();
   await expect(page.getByRole("link", { name: "A New Store Is an Investment. When Does It Pay Back?", exact: true })).toBeVisible();
   await expect(page.getByRole("link", { name: "Does Recurring Revenue Make a Business Predictable?", exact: true })).toBeVisible();
-  await expect(page.getByRole("link", { name: "When Gold Prices Rise, Is a Jeweller Really Growing?", exact: true })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Same Industry, Different Economics: How to Compare Two Companies", exact: true })).toBeVisible();
   await expect(page.getByRole("link", { name: "Why a Bank’s Deposits Matter More Than They Look", exact: true })).toBeVisible();
   await page.goto("/articles/");
+  await expect(page.getByRole("link", { name: "When Gold Prices Rise, Is a Jeweller Really Growing?", exact: true })).toBeVisible();
   await expect(page.getByRole("link", { name: "Nike’s Margin Improved. Why Did Gross Profit Fall?", exact: true })).toBeVisible();
   await expect(page.getByRole("link", { name: "What Does a $150 Billion Buyback Actually Buy?", exact: true })).toBeVisible();
   await expect(page.getByRole("link", { name: "When AI Capex Falls, Has the Spending Really Fallen?", exact: true })).toBeVisible();
@@ -70,6 +72,67 @@ test("demo content is gone and the published research is discoverable", async ({
     "/articles/understanding-roce/", "/articles/how-interest-rates-flow/",
     "/articles/revenue-growth-and-shareholder-value/",
   ]) expect((await request.get(path)).status(), path).toBe(404);
+});
+
+test("peer comparison separates margin, capital returns and growth funding", async ({ page, request }) => {
+  await page.goto(peerArticlePath);
+  await expect(page.locator(".report-byline time")).toHaveAttribute("datetime", "2026-10-13");
+  const reportedTable = page.locator(".prose table").first();
+  await expect(reportedTable).toContainText("$7,624 million");
+  await expect(reportedTable).toContainText("$5,082 million");
+  await expect(reportedTable).toContainText("24.0%, excluding exceptional item");
+  await expect(page.locator(".source-references a").first()).toHaveAttribute("href", "https://www.tcs.com/who-we-are/newsroom/press-release/tcs-financial-results-q1-fy-2027");
+  const lens = page.getByRole("figure", { name: "Illustrative two-company margin and capital comparison" });
+  const margin = lens.getByRole("slider", { name: /^B’s operating margin/ });
+  const capital = lens.getByRole("slider", { name: /^B’s operating capital/ });
+  const growth = lens.getByRole("slider", { name: /^Sales growth for both/ });
+  const row = (name: string) => lens.getByRole("row").filter({ has: page.getByRole("rowheader", { name, exact: true }) });
+  const b = (name: string) => row(name).getByRole("cell").nth(1);
+  await expect(b("Operating profit")).toHaveText("₹15.00");
+  await expect(b("Pre-tax operating return")).toHaveText("30.0%");
+  await expect(row("Pre-tax operating return").getByRole("cell").first()).toHaveText("20.0%");
+  await expect(b("Extra annual operating profit")).toHaveText("₹3.00");
+  await expect(b("Extra operating capital needed")).toHaveText("₹10.00");
+  const highMargin = lens.getByRole("button", { name: "Higher margin, more capital", exact: true });
+  await highMargin.focus();
+  await page.keyboard.press("Enter");
+  await expect(highMargin).toHaveAttribute("aria-pressed", "true");
+  await expect(b("Operating profit")).toHaveText("₹25.00");
+  await expect(b("Pre-tax operating return")).toHaveText("16.7%");
+  await expect(b("Extra operating capital needed")).toHaveText("₹30.00");
+  await lens.getByRole("button", { name: "More capital tied up", exact: true }).click();
+  await expect(b("Operating profit")).toHaveText("₹15.00");
+  await expect(b("Pre-tax operating return")).toHaveText("15.0%");
+  await lens.getByRole("button", { name: "No expansion", exact: true }).click();
+  await expect(b("Extra annual operating profit")).toHaveText("₹0.00");
+  await expect(b("Extra operating capital needed")).toHaveText("₹0.00");
+  await expect(lens.locator("[data-peer-result]")).toContainText("existing operations still need funding and upkeep");
+  await margin.fill("20");
+  await capital.fill("100");
+  await expect(lens.locator("[data-peer-result]")).toContainText("equals A’s 20.0%");
+  await margin.fill("5");
+  await capital.fill("150");
+  await growth.fill("40");
+  await expect(b("Pre-tax operating return")).toHaveText("3.3%");
+  await expect(b("Extra annual operating profit")).toHaveText("₹2.00");
+  await expect(b("Extra operating capital needed")).toHaveText("₹60.00");
+  await margin.fill("30");
+  await capital.fill("25");
+  await expect(b("Pre-tax operating return")).toHaveText("120.0%");
+  await expect(b("Extra annual operating profit")).toHaveText("₹12.00");
+  await expect(b("Extra operating capital needed")).toHaveText("₹10.00");
+  await lens.getByRole("button", { name: "Starting comparison", exact: true }).click();
+  await capital.focus();
+  await page.keyboard.press("ArrowRight");
+  await expect(capital).toHaveValue("55");
+  await expect(b("Pre-tax operating return")).toHaveText("27.3%");
+  await expect(b("Extra operating capital needed")).toHaveText("₹11.00");
+  await lens.getByText("Follow the capital calculation", { exact: true }).click();
+  await expect(lens.locator("details p")).toBeVisible();
+  await expect(lens.locator("details p")).toContainText("Margin and turnover are assumed unchanged");
+  await expect(lens.locator("figcaption")).toContainText("Neither is free cash flow");
+  const social = await page.locator('meta[property="og:image"]').getAttribute("content");
+  expect((await request.get(new URL(social!).pathname)).status()).toBe(200);
 });
 
 test("recurring revenue follows the existing cohort separately from new customers", async ({ page, request }) => {
@@ -426,7 +489,7 @@ test("LinkedIn links use the requested profile", async ({ page }) => {
 for (const width of [320, 390, 768, 1440]) {
   test("publication and article fit " + width + "px", async ({ page }) => {
     await page.setViewportSize({ width, height: 900 });
-    for (const path of ["/", "/research/", "/articles/", articlePath, latestArticlePath, newestArticlePath, aiCapexArticlePath, buybackArticlePath, marginArticlePath, goldArticlePath, depositArticlePath, storeArticlePath, recurringArticlePath, researchPath, "/about/"]) {
+    for (const path of ["/", "/research/", "/articles/", articlePath, latestArticlePath, newestArticlePath, aiCapexArticlePath, buybackArticlePath, marginArticlePath, goldArticlePath, depositArticlePath, storeArticlePath, recurringArticlePath, peerArticlePath, researchPath, "/about/"]) {
       await page.goto(path);
       await page.evaluate(() => document.fonts.ready);
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), path).toBe(true);
@@ -467,12 +530,22 @@ for (const width of [320, 390, 768, 1440]) {
     await page.goto(recurringArticlePath);
     await page.screenshot({ path: `test-results/recurring-light-${width}.png` });
     await page.getByRole("figure", { name: "Illustrative recurring revenue retention and price example" }).screenshot({ path: `test-results/recurring-lens-light-${width}.png` });
+    await page.goto(peerArticlePath);
+    await page.screenshot({ path: `test-results/peer-light-${width}.png` });
+    await page.getByRole("figure", { name: "Illustrative two-company margin and capital comparison" }).screenshot({ path: `test-results/peer-lens-light-${width}.png` });
+    if (width === 320) {
+      const comparison = page.getByRole("region", { name: "Scrollable company comparison" });
+      await comparison.focus();
+      await page.keyboard.press("ArrowRight");
+      await expect.poll(() => comparison.evaluate((element) => element.scrollLeft)).toBeGreaterThan(0);
+      await expect(page.getByText("Scroll the table sideways to compare both companies.", { exact: true })).toBeVisible();
+    }
   });
 }
 
 test("internal links, sitemap, feed and article social image resolve", async ({ page, request }) => {
   const links = new Set<string>();
-  for (const path of ["/", "/research/", "/articles/", articlePath, latestArticlePath, newestArticlePath, aiCapexArticlePath, buybackArticlePath, marginArticlePath, goldArticlePath, depositArticlePath, storeArticlePath, recurringArticlePath, researchPath, "/about/"]) {
+  for (const path of ["/", "/research/", "/articles/", articlePath, latestArticlePath, newestArticlePath, aiCapexArticlePath, buybackArticlePath, marginArticlePath, goldArticlePath, depositArticlePath, storeArticlePath, recurringArticlePath, peerArticlePath, researchPath, "/about/"]) {
     await page.goto(path);
     for (const href of await page.locator('a[href^="/"]').evaluateAll((elements) =>
       elements.map((element) => element.getAttribute("href")!),
@@ -490,6 +563,7 @@ test("internal links, sitemap, feed and article social image resolve", async ({ 
   expect(sitemap).toContain(depositArticlePath);
   expect(sitemap).toContain(storeArticlePath);
   expect(sitemap).toContain(recurringArticlePath);
+  expect(sitemap).toContain(peerArticlePath);
   expect(sitemap).toContain(researchPath);
   expect(sitemap).not.toContain("/research/__no_research__/");
   const feed = await (await request.get("/feed.xml")).text();
@@ -504,6 +578,7 @@ test("internal links, sitemap, feed and article social image resolve", async ({ 
   expect(feed).toContain(depositArticlePath);
   expect(feed).toContain(storeArticlePath);
   expect(feed).toContain(recurringArticlePath);
+  expect(feed).toContain(peerArticlePath);
   expect(feed).toContain(researchPath);
   expect(await (await request.get("/robots.txt")).text()).toContain("Sitemap:");
   await page.goto(articlePath);

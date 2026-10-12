@@ -11,6 +11,7 @@ import { GoldGrowthLens } from "@/components/articles/gold-growth-lens";
 import { DepositFundingLens } from "@/components/articles/deposit-funding-lens";
 import { StorePaybackLens } from "@/components/articles/store-payback-lens";
 import { RecurringRevenueLens } from "@/components/articles/recurring-revenue-lens";
+import { PeerEconomicsLens } from "@/components/articles/peer-economics-lens";
 import { AsianPaintsFinancialLens, AsianPaintsScenario } from "@/components/research/asian-paints-lens";
 export function ResearchCallout({
   title = "The key idea",
@@ -184,6 +185,7 @@ export const mdxComponents: MDXComponents = {
   DepositFundingLens,
   StorePaybackLens,
   RecurringRevenueLens,
+  PeerEconomicsLens,
   AsianPaintsFinancialLens,
   AsianPaintsScenario,
   table: (props: ComponentProps<"table">) => (
